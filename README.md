@@ -28,10 +28,11 @@
 
 還需要在 Firebase Console 手動完成：
 
-1. 到 Authentication。
-2. 點選「開始使用」。
-3. 在 Sign-in method 啟用 Email/Password。
-4. 到 Users 新增一個後台管理帳號與密碼。
+Firebase Authentication 已啟用 Email/Password。後台管理帳號為：
+
+`k79204@gmail.com`
+
+Firestore 規則只允許這個 Email 讀取後台報名資料與修改設定。若要新增管理者，需要先在 Firebase Authentication 新增使用者，再把 Email 加進 `firestore.rules` 的管理員清單並重新部署規則。
 
 Firestore 規則設計：
 
