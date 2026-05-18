@@ -1,6 +1,12 @@
 import { firebaseConfig, defaultSettings } from "./firebase-config.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import {
+  getAuth,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+import {
   addDoc,
   collection,
   doc,
@@ -29,6 +35,7 @@ function isConfigured() {
 }
 
 let app;
+let auth;
 let db;
 let storage;
 
@@ -39,11 +46,12 @@ function ensureFirebase() {
 
   if (!app) {
     app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
     db = getFirestore(app);
     storage = getStorage(app);
   }
 
-  return { db, storage };
+  return { auth, db, storage };
 }
 
 function normalizeSettings(settings = {}) {
@@ -74,6 +82,21 @@ export async function loadSettings() {
     return normalizeSettings();
   }
   return normalizeSettings(snap.data());
+}
+
+export async function signInAdmin(email, password) {
+  const { auth } = ensureFirebase();
+  return signInWithEmailAndPassword(auth, email, password);
+}
+
+export async function signOutAdmin() {
+  const { auth } = ensureFirebase();
+  return signOut(auth);
+}
+
+export function watchAdminAuth(callback) {
+  const { auth } = ensureFirebase();
+  return onAuthStateChanged(auth, callback);
 }
 
 export async function saveSettings(settings) {

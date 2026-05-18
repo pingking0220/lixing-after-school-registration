@@ -8,9 +8,28 @@
 2. 建立 Web App，複製 Firebase config。
 3. 啟用 Firestore Database。
 4. 啟用 Storage。
-5. 將 Firebase config 貼到 `firebase-config.js`。
+5. 啟用 Authentication 的 Email/Password。
+6. 建立一個後台管理者帳號。
+7. 將 Firebase config 貼到 `firebase-config.js`。
 
 `firebase-config.js` 目前是空白範本，未填入前可以看頁面，但無法送出報名或讀取後台資料。
+
+## 後台密碼
+
+後台頁面 `admin.html` 使用 Firebase Authentication 的 Email / Password 登入。
+
+請在 Firebase Console 啟用 Authentication：
+
+1. Authentication > Sign-in method
+2. 啟用 Email/Password
+3. 到 Users 新增一位後台管理者
+4. 使用該 Email 與密碼登入後台
+
+Firestore / Storage 規則已設定為：
+
+- 家長可以新增報名資料
+- 只有登入的後台帳號可以讀取報名資料
+- 只有登入的後台帳號可以修改設定與上傳簡章
 
 ## Firestore 資料
 

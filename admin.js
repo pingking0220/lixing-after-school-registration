@@ -3,9 +3,17 @@ import {
   listRegistrations,
   loadSettings,
   saveSettings,
-  uploadBrochure
+  signInAdmin,
+  signOutAdmin,
+  uploadBrochure,
+  watchAdminAuth
 } from "./firebase-service.js";
 
+const adminLogin = document.querySelector("#adminLogin");
+const adminApp = document.querySelector("#adminApp");
+const adminLoginForm = document.querySelector("#adminLoginForm");
+const loginMessage = document.querySelector("#loginMessage");
+const logoutButton = document.querySelector("#logoutButton");
 const rowsBody = document.querySelector("#registrationRows");
 const searchBox = document.querySelector("#searchBox");
 const settingsForm = document.querySelector("#settingsForm");
@@ -15,6 +23,17 @@ const brochureMessage = document.querySelector("#brochureMessage");
 const currentBrochureLink = document.querySelector("#currentBrochureLink");
 const exportCsvButton = document.querySelector("#exportCsvButton");
 let registrations = [];
+let hasLoadedAdmin = false;
+
+function showAdmin() {
+  adminLogin.hidden = true;
+  adminApp.hidden = false;
+}
+
+function showLogin() {
+  adminLogin.hidden = false;
+  adminApp.hidden = true;
+}
 
 function summarize(items, keyName, valueName = "count") {
   if (!items.length) return "-";
@@ -180,6 +199,39 @@ brochureForm.addEventListener("submit", async (event) => {
   }
 });
 
-loadAdmin().catch((error) => {
-  rowsBody.innerHTML = `<tr><td colspan="10">後台資料載入失敗：${error.message}</td></tr>`;
+adminLoginForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  loginMessage.textContent = "登入中";
+
+  try {
+    await signInAdmin(adminLoginForm.adminEmail.value.trim(), adminLoginForm.adminPassword.value);
+    loginMessage.textContent = "";
+  } catch (error) {
+    loginMessage.textContent = `登入失敗：${error.message}`;
+  }
 });
+
+logoutButton.addEventListener("click", async () => {
+  await signOutAdmin();
+});
+
+try {
+  watchAdminAuth((user) => {
+    if (!user) {
+      hasLoadedAdmin = false;
+      showLogin();
+      return;
+    }
+
+    showAdmin();
+    if (!hasLoadedAdmin) {
+      hasLoadedAdmin = true;
+      loadAdmin().catch((error) => {
+        rowsBody.innerHTML = `<tr><td colspan="10">後台資料載入失敗：${error.message}</td></tr>`;
+      });
+    }
+  });
+} catch (error) {
+  loginMessage.textContent = error.message;
+  showLogin();
+}

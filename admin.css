@@ -1,3 +1,30 @@
+.admin-login-shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.admin-login-panel {
+  width: min(420px, 100%);
+  padding: 26px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: var(--shadow);
+}
+
+.admin-login-panel h1 {
+  margin-bottom: 18px;
+  font-size: 2rem;
+}
+
+.admin-login-panel form {
+  display: grid;
+  gap: 14px;
+  padding: 0;
+}
+
 .admin-shell {
   width: min(1280px, calc(100% - 32px));
   margin: 0 auto;
