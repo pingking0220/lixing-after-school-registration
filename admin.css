@@ -112,6 +112,20 @@
   padding: 0;
 }
 
+.term-settings-form {
+  min-width: min(640px, 100%);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.term-settings-form label:last-of-type,
+.term-settings-form .primary-button {
+  grid-column: 1 / -1;
+}
+
+.term-settings-form .primary-button {
+  justify-self: end;
+}
+
 .settings-form label span {
   display: block;
   margin-bottom: 8px;
@@ -224,6 +238,10 @@ td {
 
   .settings-form {
     grid-template-columns: 1fr;
+  }
+
+  .term-settings-form .primary-button {
+    justify-self: stretch;
   }
 
   .admin-actions,

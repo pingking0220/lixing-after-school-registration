@@ -115,6 +115,10 @@ function csvValue(value) {
   return `"${text.replace(/"/g, '""')}"`;
 }
 
+function normalizeYear(value) {
+  return value.trim().replace(/[０-９]/g, (digit) => String.fromCharCode(digit.charCodeAt(0) - 0xfee0));
+}
+
 function exportCsv() {
   const headers = [
     "編號",
@@ -186,6 +190,8 @@ async function loadAdmin() {
   const [items, settings] = await Promise.all([listRegistrations(), loadSettings()]);
   registrations = items;
 
+  settingsForm.querySelector('[name="schoolYear"]').value = settings.schoolYear;
+  settingsForm.querySelector('[name="semester"]').value = settings.semester;
   settingsForm.querySelector('[name="registrationTerm"]').value = settings.registrationTerm;
   updateBrochureLink(settings);
   renderStats();
@@ -200,10 +206,15 @@ settingsForm.addEventListener("submit", async (event) => {
   settingsMessage.textContent = "儲存中";
 
   try {
+    const schoolYear = normalizeYear(settingsForm.querySelector('[name="schoolYear"]').value);
+    if (!schoolYear) throw new Error("請填寫學年。");
+
     const result = await saveSettings({
+      schoolYear,
+      semester: settingsForm.querySelector('[name="semester"]').value,
       registrationTerm: settingsForm.querySelector('[name="registrationTerm"]').value
     });
-    settingsMessage.textContent = `已儲存：${result.registrationTermLabel}`;
+    settingsMessage.textContent = `已儲存：${result.registrationDisplayName}（${result.registrationTermLabel}）`;
   } catch (error) {
     settingsMessage.textContent = `設定儲存失敗：${friendlyError(error)}`;
   }

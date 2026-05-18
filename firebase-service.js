@@ -50,11 +50,16 @@ function ensureFirebase() {
 
 function normalizeSettings(settings = {}) {
   const registrationTerm = settings.registrationTerm || defaultSettings.registrationTerm;
+  const schoolYear = String(settings.schoolYear || defaultSettings.schoolYear).trim() || defaultSettings.schoolYear;
+  const semester = settings.semester || defaultSettings.semester;
   return {
     ...defaultSettings,
     ...settings,
     registrationTerm,
-    registrationTermLabel: termLabels[registrationTerm] || defaultSettings.registrationTermLabel
+    registrationTermLabel: termLabels[registrationTerm] || defaultSettings.registrationTermLabel,
+    schoolYear,
+    semester,
+    registrationDisplayName: `${schoolYear}學年${semester}`
   };
 }
 

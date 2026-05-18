@@ -43,11 +43,22 @@
       <section class="settings-panel">
         <div>
           <h2>報名學期設定</h2>
-          <p>這會影響家長填寫班級後，系統是否自動升一個年級。</p>
+          <p>學年與學期會顯示在報名摘要；升級規則會影響班級判讀後是否自動升一個年級。</p>
         </div>
-        <form id="settingsForm" class="settings-form">
+        <form id="settingsForm" class="settings-form term-settings-form">
           <label>
-            <span>目前報名學期</span>
+            <span>學年</span>
+            <input type="text" name="schoolYear" inputmode="numeric" pattern="[0-9０-９]+" placeholder="115" required>
+          </label>
+          <label>
+            <span>學期</span>
+            <select name="semester" required>
+              <option value="上學期">上學期</option>
+              <option value="下學期">下學期</option>
+            </select>
+          </label>
+          <label>
+            <span>升級規則</span>
             <select name="registrationTerm" required>
               <option value="nextYearFirst">下一學年度上學期（學生升一個年級）</option>
               <option value="sameYearSecond">本學年度下學期（不升級）</option>

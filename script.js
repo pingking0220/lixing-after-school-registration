@@ -12,14 +12,22 @@ const brochureName = document.querySelector("#brochureName");
 const brochureNote = document.querySelector("#brochureNote");
 const confirmRules = document.querySelector('[name="confirmRules"]');
 const classHint = document.querySelector("#classHint");
+const resetButton = document.querySelector("#resetButton");
+const editButton = document.querySelector("#editButton");
+const submitButton = document.querySelector("#submitButton");
+const confirmSubmitButton = document.querySelector("#confirmSubmitButton");
 
 let appSettings = {
   registrationTerm: "nextYearFirst",
   registrationTermLabel: "下一學年度上學期",
+  schoolYear: "115",
+  semester: "上學期",
+  registrationDisplayName: "115學年上學期",
   brochurePath: "brochures/115-1課後照顧班招生簡章(二到六年級).pdf",
   brochureName: "115-1課後照顧班招生簡章(二到六年級).pdf"
 };
 let keepSummaryAfterReset = false;
+let pendingPayload = null;
 
 const gradeKey = {
   低年級: "low",
@@ -119,6 +127,28 @@ function setGroupEnabled(container, enabled) {
   });
 }
 
+function setFieldsLocked(locked) {
+  form.querySelectorAll("input, select, textarea").forEach((control) => {
+    if (control.type !== "hidden") control.disabled = locked;
+  });
+
+  if (!locked) {
+    updateGradePanel();
+    updateConditionalGroups();
+    if (brochureLink.getAttribute("href") && confirmRules.checked) {
+      confirmRules.disabled = false;
+    }
+  }
+}
+
+function setConfirmationMode(enabled) {
+  resetButton.hidden = enabled;
+  submitButton.hidden = enabled;
+  editButton.hidden = !enabled;
+  confirmSubmitButton.hidden = !enabled;
+  setFieldsLocked(enabled);
+}
+
 function updateBrochure(settings) {
   const path = settings.brochurePath || "";
   const name = settings.brochureName || "尚未設定簡章";
@@ -171,7 +201,7 @@ function updateGradePanel() {
   } else if (enrollment.number > 6) {
     gradeResult.textContent = "依目前設定，學生升上七年級，已不適用本次國小課後照顧班報名。";
   } else {
-    gradeResult.textContent = `目前後台設定為「${appSettings.registrationTermLabel}」，本次以 ${enrollment.name}、${enrollment.band} 身分報名。`;
+    gradeResult.textContent = `報名學期：${appSettings.registrationDisplayName}。本次以 ${enrollment.name}、${enrollment.band} 身分報名。`;
   }
 
   gradePanels.forEach((panel) => {
@@ -300,7 +330,7 @@ function collectPayload() {
     parentName: fieldValue("parentName"),
     parentPhone: fieldValue("parentPhone"),
     email: fieldValue("email"),
-    registrationTerm: appSettings.registrationTermLabel,
+    registrationTerm: appSettings.registrationDisplayName,
     currentGrade: gradeNames[Number(fieldValue("currentGrade"))] || "",
     enrollmentGrade: enrollment.name,
     enrollmentBand: enrollment.band,
@@ -323,6 +353,8 @@ form.addEventListener("change", () => {
 form.querySelector('[name="className"]').addEventListener("input", updateGradeFromClassName);
 
 form.addEventListener("reset", () => {
+  pendingPayload = null;
+  setConfirmationMode(false);
   const keepSummary = keepSummaryAfterReset;
   keepSummaryAfterReset = false;
   window.setTimeout(() => {
@@ -343,13 +375,31 @@ form.addEventListener("submit", async (event) => {
 
   if (!form.reportValidity() || !validateGroupedChoices()) return;
 
-  const submitButton = form.querySelector(".primary-button");
-  const payload = collectPayload();
-  submitButton.disabled = true;
-  submitButton.textContent = "送出中";
+  pendingPayload = collectPayload();
+  renderSummary(pendingPayload);
+  setConfirmationMode(true);
+  summaryContent.scrollIntoView({ behavior: "smooth", block: "nearest" });
+});
+
+editButton.addEventListener("click", () => {
+  pendingPayload = null;
+  setConfirmationMode(false);
+  summaryContent.className = "summary-empty";
+  summaryContent.textContent = "修改後請再按一次送出報名，系統會重新產生摘要。";
+});
+
+confirmSubmitButton.addEventListener("click", async () => {
+  if (!pendingPayload) return;
+
+  const payload = pendingPayload;
+  confirmSubmitButton.disabled = true;
+  editButton.disabled = true;
+  confirmSubmitButton.textContent = "送出中";
 
   try {
     const result = await createRegistration(payload);
+    pendingPayload = null;
+    setConfirmationMode(false);
     renderSummary(payload, result);
     keepSummaryAfterReset = true;
     form.reset();
@@ -360,8 +410,9 @@ form.addEventListener("submit", async (event) => {
     message.textContent = `報名資料送出失敗：${error.message}`;
     form.querySelector(".form-actions").prepend(message);
   } finally {
-    submitButton.disabled = false;
-    submitButton.textContent = "送出報名";
+    confirmSubmitButton.disabled = false;
+    editButton.disabled = false;
+    confirmSubmitButton.textContent = "確認報名";
   }
 });
 
