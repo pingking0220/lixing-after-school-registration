@@ -1,4 +1,8 @@
-import { createRegistration, loadSettings as loadRemoteSettings } from "./firebase-service.js";
+import {
+  createRegistration,
+  findRegistrationStatus,
+  loadSettings as loadRemoteSettings
+} from "./firebase-service.js";
 
 const form = document.querySelector("#registrationForm");
 const gradePlaceholder = document.querySelector("#gradePlaceholder");
@@ -16,6 +20,13 @@ const resetButton = document.querySelector("#resetButton");
 const editButton = document.querySelector("#editButton");
 const submitButton = document.querySelector("#submitButton");
 const confirmSubmitButton = document.querySelector("#confirmSubmitButton");
+const successDialog = document.querySelector("#successDialog");
+const successMessage = document.querySelector("#successMessage");
+const successRegistrationId = document.querySelector("#successRegistrationId");
+const successCloseButton = document.querySelector("#successCloseButton");
+const lookupForm = document.querySelector("#lookupForm");
+const lookupMessage = document.querySelector("#lookupMessage");
+const lookupResult = document.querySelector("#lookupResult");
 
 let appSettings = {
   registrationTerm: "nextYearFirst",
@@ -147,6 +158,17 @@ function setConfirmationMode(enabled) {
   editButton.hidden = !enabled;
   confirmSubmitButton.hidden = !enabled;
   setFieldsLocked(enabled);
+}
+
+function showSuccessMessage(payload, result) {
+  successMessage.textContent = `${payload.studentName} 的 ${payload.registrationTerm} 課後照顧班報名已完成。可用學生姓名與家長電話查詢報名狀態。`;
+  successRegistrationId.textContent = result.id;
+  successDialog.hidden = false;
+  successCloseButton.focus();
+}
+
+function hideSuccessMessage() {
+  successDialog.hidden = true;
 }
 
 function updateBrochure(settings) {
@@ -319,6 +341,33 @@ function renderSummary(payload, submitResult = {}) {
   summaryContent.replaceChildren(list);
 }
 
+function renderLookupResults(items) {
+  lookupResult.hidden = false;
+
+  if (!items.length) {
+    lookupResult.className = "lookup-result is-empty";
+    lookupResult.textContent = "查無報名完成紀錄，請確認學生姓名與家長電話是否和報名時相同。";
+    return;
+  }
+
+  lookupResult.className = "lookup-result";
+  const list = document.createElement("dl");
+  items.forEach((item) => {
+    const row = document.createElement("div");
+    row.className = "row";
+
+    const term = document.createElement("dt");
+    term.textContent = `${item.studentName} ${item.className || ""}`.trim();
+
+    const detail = document.createElement("dd");
+    detail.textContent = `已完成 ${item.registrationTerm || "課後照顧班"} 報名，報名年級：${item.enrollmentGrade || "未記錄"}，送出時間：${item.submitted_at || "處理中"}`;
+
+    row.append(term, detail);
+    list.append(row);
+  });
+  lookupResult.replaceChildren(list);
+}
+
 function collectPayload() {
   const enrollment = getEnrollmentGrade();
   const key = gradeKey[enrollment.band];
@@ -401,6 +450,7 @@ confirmSubmitButton.addEventListener("click", async () => {
     pendingPayload = null;
     setConfirmationMode(false);
     renderSummary(payload, result);
+    showSuccessMessage(payload, result);
     keepSummaryAfterReset = true;
     form.reset();
     summaryContent.scrollIntoView({ behavior: "smooth", block: "nearest" });
@@ -413,6 +463,29 @@ confirmSubmitButton.addEventListener("click", async () => {
     confirmSubmitButton.disabled = false;
     editButton.disabled = false;
     confirmSubmitButton.textContent = "確認報名";
+  }
+});
+
+successCloseButton.addEventListener("click", hideSuccessMessage);
+
+successDialog.addEventListener("click", (event) => {
+  if (event.target === successDialog) hideSuccessMessage();
+});
+
+lookupForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  lookupMessage.textContent = "查詢中";
+  lookupResult.hidden = true;
+  lookupResult.replaceChildren();
+
+  try {
+    const studentName = lookupForm.querySelector('[name="lookupStudentName"]').value.trim();
+    const parentPhone = lookupForm.querySelector('[name="lookupParentPhone"]').value.trim();
+    const items = await findRegistrationStatus(studentName, parentPhone);
+    lookupMessage.textContent = items.length ? "查詢完成" : "";
+    renderLookupResults(items);
+  } catch (error) {
+    lookupMessage.textContent = `查詢失敗：${error.message}`;
   }
 });
 

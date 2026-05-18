@@ -7,16 +7,17 @@ import {
   signOut
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 import {
-  addDoc,
   collection,
   doc,
   getDoc,
   getDocs,
   getFirestore,
+  limit,
   orderBy,
   query,
   serverTimestamp,
-  setDoc
+  setDoc,
+  writeBatch
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 const termLabels = {
@@ -80,6 +81,21 @@ function fileToDataUrl(file) {
   });
 }
 
+function normalizeLookupName(value) {
+  return String(value || "").trim().replace(/\s+/g, "").toLowerCase();
+}
+
+function normalizeLookupPhone(value) {
+  return String(value || "").replace(/\D/g, "");
+}
+
+async function registrationLookupKey(studentName, parentPhone) {
+  const normalized = `${normalizeLookupName(studentName)}|${normalizeLookupPhone(parentPhone)}`;
+  const bytes = new TextEncoder().encode(normalized);
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
 export async function loadSettings() {
   if (!isConfigured()) return normalizeSettings();
 
@@ -116,14 +132,51 @@ export async function saveSettings(settings) {
 
 export async function createRegistration(payload) {
   const { db } = ensureFirebase();
-  const docRef = await addDoc(collection(db, "registrations"), {
+  const submittedAt = serverTimestamp();
+  const registrationRef = doc(collection(db, "registrations"));
+  const lookupKey = await registrationLookupKey(payload.studentName, payload.parentPhone);
+  const lookupRef = doc(db, "registrationLookups", lookupKey, "entries", registrationRef.id);
+  const batch = writeBatch(db);
+
+  batch.set(registrationRef, {
     ...payload,
-    submittedAt: serverTimestamp()
+    submittedAt
   });
+  batch.set(lookupRef, {
+    registrationId: registrationRef.id,
+    studentName: payload.studentName,
+    className: payload.className,
+    registrationTerm: payload.registrationTerm,
+    currentGrade: payload.currentGrade,
+    enrollmentGrade: payload.enrollmentGrade,
+    enrollmentBand: payload.enrollmentBand,
+    submittedAt
+  });
+  await batch.commit();
+
   return {
-    id: docRef.id,
+    id: registrationRef.id,
     submitted_at: new Date().toLocaleString("zh-TW", { hour12: false })
   };
+}
+
+export async function findRegistrationStatus(studentName, parentPhone) {
+  const { db } = ensureFirebase();
+  const lookupKey = await registrationLookupKey(studentName, parentPhone);
+  const lookupQuery = query(
+    collection(db, "registrationLookups", lookupKey, "entries"),
+    orderBy("submittedAt", "desc"),
+    limit(5)
+  );
+  const snap = await getDocs(lookupQuery);
+  return snap.docs.map((item) => {
+    const data = item.data();
+    return {
+      id: item.id,
+      submitted_at: timestampText(data.submittedAt),
+      ...data
+    };
+  });
 }
 
 export async function listRegistrations() {

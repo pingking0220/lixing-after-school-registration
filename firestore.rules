@@ -13,6 +13,27 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    match /registrationLookups/{lookupKey} {
+      allow read, write: if false;
+
+      match /entries/{entryId} {
+        allow get, list: if true;
+        allow create: if request.resource.data.keys().hasOnly([
+            'registrationId',
+            'studentName',
+            'className',
+            'registrationTerm',
+            'currentGrade',
+            'enrollmentGrade',
+            'enrollmentBand',
+            'submittedAt'
+          ])
+          && request.resource.data.registrationId == entryId
+          && request.resource.data.submittedAt == request.time;
+        allow update, delete: if false;
+      }
+    }
+
     match /settings/{docId} {
       allow read: if true;
       allow write: if isAdmin();

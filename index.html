@@ -255,8 +255,34 @@
       <aside class="summary-panel" aria-live="polite">
         <h2>報名摘要</h2>
         <div id="summaryContent" class="summary-empty">送出後會在這裡顯示本次報名內容。</div>
+
+        <section class="lookup-panel" aria-labelledby="lookup-title">
+          <h2 id="lookup-title">查詢報名</h2>
+          <form id="lookupForm" class="lookup-form">
+            <label class="field">
+              <span>學生姓名</span>
+              <input type="text" name="lookupStudentName" required>
+            </label>
+            <label class="field">
+              <span>家長聯絡電話</span>
+              <input type="tel" name="lookupParentPhone" inputmode="tel" required>
+            </label>
+            <button class="ghost-button" type="submit">查詢是否報名成功</button>
+            <p id="lookupMessage" class="settings-message" aria-live="polite"></p>
+          </form>
+          <div id="lookupResult" class="lookup-result" hidden></div>
+        </section>
       </aside>
     </main>
+
+    <div class="success-modal" id="successDialog" role="dialog" aria-modal="true" aria-labelledby="successTitle" hidden>
+      <section class="success-card">
+        <h2 id="successTitle">您已報名完成</h2>
+        <p id="successMessage">系統已收到本次報名資料。</p>
+        <p class="success-id">報名編號：<strong id="successRegistrationId"></strong></p>
+        <button class="primary-button" id="successCloseButton" type="button">我知道了</button>
+      </section>
+    </div>
 
     <script type="module" src="script.js"></script>
   </body>

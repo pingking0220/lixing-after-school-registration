@@ -477,17 +477,20 @@ textarea:focus {
   margin: 0;
 }
 
-.summary-panel div.row {
+.summary-panel div.row,
+.lookup-result div.row {
   padding-bottom: 10px;
   border-bottom: 1px solid var(--line);
 }
 
-.summary-panel dt {
+.summary-panel dt,
+.lookup-result dt {
   color: var(--muted);
   font-size: 0.9rem;
 }
 
-.summary-panel dd {
+.summary-panel dd,
+.lookup-result dd {
   margin: 3px 0 0;
   font-weight: 700;
   line-height: 1.6;
@@ -497,6 +500,89 @@ textarea:focus {
   margin: 12px 0 0;
   color: #b33a23;
   font-weight: 700;
+}
+
+.settings-message {
+  min-height: 1.4em;
+  font-weight: 700;
+}
+
+.lookup-panel {
+  margin-top: 24px;
+  padding-top: 22px;
+  border-top: 1px solid var(--line);
+}
+
+.lookup-form {
+  display: grid;
+  gap: 12px;
+  padding: 0;
+}
+
+.lookup-form .ghost-button {
+  width: 100%;
+}
+
+.lookup-result {
+  margin-top: 12px;
+  padding: 14px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: #f8fbf8;
+}
+
+.lookup-result dl {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.lookup-result.is-empty {
+  color: #8a432f;
+  background: #fff3ec;
+  border-color: #ecc2b0;
+  line-height: 1.7;
+}
+
+.success-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(36, 48, 47, 0.45);
+}
+
+.success-modal[hidden] {
+  display: none;
+}
+
+.success-card {
+  width: min(420px, 100%);
+  padding: 26px;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: var(--shadow);
+}
+
+.success-card h2 {
+  color: var(--leaf);
+  font-size: 1.8rem;
+}
+
+.success-card p {
+  line-height: 1.7;
+}
+
+.success-id {
+  padding: 12px;
+  border-radius: 8px;
+  background: #eef7f1;
+}
+
+.success-card .primary-button {
+  width: 100%;
 }
 
 @media (max-width: 920px) {
