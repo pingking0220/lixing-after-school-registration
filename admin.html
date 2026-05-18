@@ -14,7 +14,7 @@
         <h1>後台登入</h1>
         <form id="adminLoginForm">
           <label class="field">
-            <span>後台帳號 Email</span>
+            <span>後台 Email</span>
             <input type="email" name="adminEmail" autocomplete="username" required>
           </label>
           <label class="field">
@@ -31,10 +31,10 @@
       <header class="admin-header">
         <div>
           <p class="kicker">力行國小課後照顧班</p>
-          <h1>報名狀況後台</h1>
+          <h1>報名管理</h1>
         </div>
         <div class="admin-actions">
-          <a class="ghost-link" href="index.html">前台報名</a>
+          <a class="ghost-link" href="index.html">回報名頁</a>
           <button class="ghost-link" id="logoutButton" type="button">登出</button>
           <button class="primary-link" id="exportCsvButton" type="button">匯出 CSV</button>
         </div>
@@ -42,15 +42,15 @@
 
       <section class="settings-panel">
         <div>
-          <h2>報名期別設定</h2>
-          <p>設定後，前台會自動依此判斷學生報名時的年級與年段。</p>
+          <h2>報名學期設定</h2>
+          <p>這會影響家長填寫班級後，系統是否自動升一個年級。</p>
         </div>
         <form id="settingsForm" class="settings-form">
           <label>
-            <span>目前報名期別</span>
+            <span>目前報名學期</span>
             <select name="registrationTerm" required>
-              <option value="nextYearFirst">下一學年度上學期：學生升一個年級</option>
-              <option value="sameYearSecond">同學年度下學期：學生維持目前年級</option>
+              <option value="nextYearFirst">下一學年度上學期（學生升一個年級）</option>
+              <option value="sameYearSecond">本學年度下學期（不升級）</option>
             </select>
           </label>
           <button class="primary-button" type="submit">儲存設定</button>
@@ -61,11 +61,11 @@
       <section class="settings-panel">
         <div>
           <h2>招生簡章設定</h2>
-          <p>目前前台使用：<a id="currentBrochureLink" href="#" target="_blank" rel="noopener">載入中</a></p>
+          <p>家長會從報名頁另開閱讀：<a id="currentBrochureLink" href="#" target="_blank" rel="noopener">載入中</a></p>
         </div>
         <form id="brochureForm" class="settings-form" enctype="multipart/form-data">
           <label>
-            <span>更換簡章 PDF</span>
+            <span>更換 PDF 簡章</span>
             <input type="file" name="brochure" accept="application/pdf,.pdf" required>
           </label>
           <button class="primary-button" type="submit">上傳簡章</button>
@@ -79,23 +79,23 @@
           <strong id="totalCount">0</strong>
         </article>
         <article>
-          <span>延長班人數</span>
+          <span>延長照顧</span>
           <strong id="extendedCount">0</strong>
         </article>
         <article>
-          <span>年段分布</span>
+          <span>年段統計</span>
           <strong id="bandSummary">-</strong>
         </article>
         <article>
-          <span>午餐概況</span>
+          <span>午餐統計</span>
           <strong id="lunchSummary">-</strong>
         </article>
       </section>
 
       <section class="admin-table-panel">
         <div class="table-toolbar">
-          <h2>報名清單</h2>
-          <input id="searchBox" type="search" placeholder="搜尋學生、班級、家長或電話">
+          <h2>報名名冊</h2>
+          <input id="searchBox" type="search" placeholder="搜尋學生、班級、家長、電話或 Email">
         </div>
         <div class="table-scroll">
           <table>
@@ -106,10 +106,10 @@
                 <th>學生</th>
                 <th>班級</th>
                 <th>報名年段</th>
-                <th>課後照顧班</th>
-                <th>延長班</th>
+                <th>課後照顧</th>
+                <th>延長照顧</th>
                 <th>午餐</th>
-                <th>減免</th>
+                <th>補助</th>
                 <th>家長聯絡</th>
               </tr>
             </thead>

@@ -14,12 +14,12 @@
             <span>力</span>
           </div>
           <div>
-            <p class="kicker">臺北市文山區力行國民小學</p>
-            <h1 id="page-title">115學年度第1學期課後照顧班報名表</h1>
+            <p class="kicker">力行國小課後照顧班</p>
+            <h1 id="page-title">115 學年度第 1 學期課後照顧班報名</h1>
             <p class="intro">
-              課後照顧班以協助學生完成作業、生活照顧及團康活動為主，提供孩子放學後安心與穩定的學習環境。
+              請家長先閱讀招生簡章，再填寫學生資料。系統會依班級自動判讀目前年級，並依後台設定的報名學期判斷報名年級與可選日數。
             </p>
-            <a class="admin-shortcut" href="admin.html">查看報名後台</a>
+            <a class="admin-shortcut" href="admin.html">後台管理</a>
           </div>
         </header>
 
@@ -29,22 +29,22 @@
               <span>一</span>
               <div>
                 <h2>家長確認</h2>
-                <p>請家長詳閱招生簡章及相關規定後再填寫。</p>
+                <p>請先另開招生簡章閱讀，閱讀後才可以勾選確認。</p>
               </div>
             </div>
             <div class="brochure-box">
               <div class="brochure-toolbar">
                 <div>
-                  <strong>課後照顧班招生簡章</strong>
+                  <strong>招生簡章</strong>
                   <span id="brochureName">載入中</span>
                 </div>
-                <a id="brochureLink" class="ghost-link" href="#" target="_blank" rel="noopener">另開招生簡章</a>
+                <a id="brochureLink" class="ghost-link" href="#" target="_blank" rel="noopener">另開簡章</a>
               </div>
-              <p class="brochure-note" id="brochureNote">請先點選上方連結另開簡章，閱讀後即可勾選家長確認。</p>
+              <p class="brochure-note" id="brochureNote">請點選「另開簡章」閱讀後，再回到本頁勾選確認。</p>
             </div>
             <label class="check-card">
               <input type="checkbox" name="confirmRules" required disabled>
-              <span>是，我已詳閱並同意相關規定</span>
+              <span>我已閱讀並了解招生簡章、收費與退費相關規定</span>
             </label>
           </section>
 
@@ -52,8 +52,8 @@
             <div class="section-heading">
               <span>二</span>
               <div>
-                <h2>學生基本資料</h2>
-                <p>請務必詳細填寫資料，以利後續通知。</p>
+                <h2>學生與家長資料</h2>
+                <p>班級可輸入二年三班、2 年 3 班或 203，系統會自動判讀年級。</p>
               </div>
             </div>
 
@@ -66,15 +66,15 @@
               <fieldset class="field">
                 <legend>學生性別</legend>
                 <div class="choice-row">
-                  <label><input type="radio" name="gender" value="男生" required> 男生</label>
-                  <label><input type="radio" name="gender" value="女生"> 女生</label>
+                  <label><input type="radio" name="gender" value="男" required> 男</label>
+                  <label><input type="radio" name="gender" value="女"> 女</label>
                 </div>
               </fieldset>
 
               <label class="field">
                 <span>目前班級</span>
-                <input type="text" name="className" placeholder="例：二年三班" required>
-                <small class="field-note" id="classHint">可輸入二年三班、2年3班或203，系統會自動判斷年級。</small>
+                <input type="text" name="className" placeholder="例如：二年三班、203" required>
+                <small class="field-note" id="classHint">可輸入中文班級或數字班級，例如二年三班、2 年 3 班、203。</small>
               </label>
 
               <label class="field">
@@ -83,13 +83,13 @@
               </label>
 
               <label class="field full">
-                <span>家長手機號碼</span>
-                <input type="tel" name="parentPhone" inputmode="tel" placeholder="例：0912-345-678" required>
+                <span>家長聯絡電話</span>
+                <input type="tel" name="parentPhone" inputmode="tel" placeholder="例如：0912-345-678" required>
               </label>
 
               <label class="field full">
                 <span>Email</span>
-                <input type="email" name="email" autocomplete="email" placeholder="例：parent@example.com" required>
+                <input type="email" name="email" autocomplete="email" placeholder="例如：parent@example.com" required>
               </label>
             </div>
           </section>
@@ -98,33 +98,33 @@
             <div class="section-heading">
               <span>三</span>
               <div>
-                <h2>課後班報名資訊</h2>
-                <p>請選擇年段，系統會顯示對應可報名日期。</p>
+                <h2>報名內容</h2>
+                <p>系統會依後台設定判斷是否升級，並只顯示該年段可報名的日數。</p>
               </div>
             </div>
 
             <input type="hidden" name="currentGrade" required>
 
             <div class="grade-result" id="gradeResult" aria-live="polite">
-              輸入目前班級後，系統會自動判斷報名年段。
+              請先輸入目前班級，系統會自動判斷報名年級與年段。
             </div>
 
             <div class="grade-placeholder" id="gradePlaceholder">
-              請先選擇年段
+              尚未判讀到年段
             </div>
 
             <div class="grade-panel" data-grade="低年級" hidden>
               <h3>低年級</h3>
               <div class="grid two">
                 <fieldset class="field">
-                  <legend>是否參加課後照顧班？（12:00-15:55）</legend>
+                  <legend>是否報名課後照顧班（放學後至 15:55）</legend>
                   <div class="choice-row">
                     <label><input type="radio" name="care_low" value="是" required> 是</label>
                     <label><input type="radio" name="care_low" value="否"> 否</label>
                   </div>
                 </fieldset>
                 <fieldset class="field" data-days-for="care_low">
-                  <legend>課後照顧班參加日期</legend>
+                  <legend>課後照顧班報名日</legend>
                   <div class="check-grid">
                     <label><input type="checkbox" name="careDays_low" value="星期一"> 星期一</label>
                     <label><input type="checkbox" name="careDays_low" value="星期三"> 星期三</label>
@@ -139,14 +139,14 @@
               <h3>中年級</h3>
               <div class="grid two">
                 <fieldset class="field">
-                  <legend>是否參加課後照顧班？（12:00-15:55）</legend>
+                  <legend>是否報名課後照顧班（放學後至 15:55）</legend>
                   <div class="choice-row">
                     <label><input type="radio" name="care_mid" value="是" required> 是</label>
                     <label><input type="radio" name="care_mid" value="否"> 否</label>
                   </div>
                 </fieldset>
                 <fieldset class="field" data-days-for="care_mid">
-                  <legend>課後照顧班參加日期</legend>
+                  <legend>課後照顧班報名日</legend>
                   <div class="check-grid">
                     <label><input type="checkbox" name="careDays_mid" value="星期三"> 星期三</label>
                     <label><input type="checkbox" name="careDays_mid" value="星期五"> 星期五</label>
@@ -159,14 +159,14 @@
               <h3>高年級</h3>
               <div class="grid two">
                 <fieldset class="field">
-                  <legend>是否參加課後照顧班？（12:00-15:55）</legend>
+                  <legend>是否報名課後照顧班（放學後至 15:55）</legend>
                   <div class="choice-row">
                     <label><input type="radio" name="care_high" value="是" required> 是</label>
                     <label><input type="radio" name="care_high" value="否"> 否</label>
                   </div>
                 </fieldset>
                 <fieldset class="field" data-days-for="care_high">
-                  <legend>課後照顧班參加日期</legend>
+                  <legend>課後照顧班報名日</legend>
                   <div class="check-grid">
                     <label><input type="checkbox" name="careDays_high" value="星期三"> 星期三</label>
                   </div>
@@ -177,7 +177,7 @@
             <div class="shared-options">
               <div class="grid two">
                 <fieldset class="field">
-                  <legend>是否參加延長班？（16:00-18:10）</legend>
+                  <legend>是否報名延長照顧（至 18:10）</legend>
                   <div class="choice-row">
                     <label><input type="radio" name="extended" value="是" required> 是</label>
                     <label><input type="radio" name="extended" value="否"> 否</label>
@@ -185,7 +185,7 @@
                 </fieldset>
 
                 <fieldset class="field" id="extendedDays">
-                  <legend>延長班參加日期</legend>
+                  <legend>延長照顧報名日</legend>
                   <div class="check-grid">
                     <label><input type="checkbox" name="extendedDays" value="星期一"> 星期一</label>
                     <label><input type="checkbox" name="extendedDays" value="星期二"> 星期二</label>
@@ -197,38 +197,38 @@
               </div>
 
               <fieldset class="field">
-                <legend>午餐需求</legend>
+                <legend>午餐選擇</legend>
                 <div class="choice-list">
-                  <label><input type="radio" name="lunch" value="學校午餐－葷食" required> 學校午餐－葷食</label>
-                  <label><input type="radio" name="lunch" value="學校午餐－素食"> 學校午餐－素食</label>
-                  <label><input type="radio" name="lunch" value="自備午餐／不訂餐"> 自備午餐／不訂餐</label>
+                  <label><input type="radio" name="lunch" value="訂購午餐（葷食）" required> 訂購午餐（葷食）</label>
+                  <label><input type="radio" name="lunch" value="訂購午餐（素食）"> 訂購午餐（素食）</label>
+                  <label><input type="radio" name="lunch" value="不訂餐（自行準備）"> 不訂餐（自行準備）</label>
                 </div>
               </fieldset>
 
               <div class="grid two">
                 <fieldset class="field">
-                  <legend>是否具減免身分？</legend>
+                  <legend>是否具有補助身分</legend>
                   <div class="choice-list">
-                    <label><input type="radio" name="subsidy" value="一般生，無減免身分。" required> 一般生，無減免身分。</label>
-                    <label><input type="radio" name="subsidy" value="有減免身分"> 有減免身分</label>
+                    <label><input type="radio" name="subsidy" value="一般生（無補助）" required> 一般生（無補助）</label>
+                    <label><input type="radio" name="subsidy" value="符合補助身分"> 符合補助身分</label>
                   </div>
                 </fieldset>
 
                 <fieldset class="field" id="subsidyTypes">
-                  <legend>減免身分別</legend>
-                  <p class="field-note">開學後需補交證明文件</p>
+                  <legend>補助身分</legend>
+                  <p class="field-note">可複選，後續請依學校通知繳交證明。</p>
                   <div class="choice-list">
                     <label><input type="checkbox" name="subsidyTypes" value="低收入戶"> 低收入戶</label>
+                    <label><input type="checkbox" name="subsidyTypes" value="中低收入戶"> 中低收入戶</label>
                     <label><input type="checkbox" name="subsidyTypes" value="身心障礙"> 身心障礙</label>
-                    <label><input type="checkbox" name="subsidyTypes" value="原住民"> 原住民</label>
-                    <label><input type="checkbox" name="subsidyTypes" value="安心就學方案"> 安心就學方案</label>
+                    <label><input type="checkbox" name="subsidyTypes" value="原住民學生"> 原住民學生</label>
                   </div>
                 </fieldset>
               </div>
 
               <label class="field">
-                <span>需特別協助事項</span>
-                <textarea name="notes" rows="4" placeholder="若無可留空"></textarea>
+                <span>其他備註</span>
+                <textarea name="notes" rows="4" placeholder="如無可留白"></textarea>
               </label>
             </div>
           </section>
@@ -236,10 +236,10 @@
           <section class="notice">
             <h2>提醒事項</h2>
             <ul>
-              <li>開學後另發繳費通知。</li>
-              <li>減免身分請記得補交證明文件。</li>
-              <li>若學生不訂餐，請務必確認已勾選「自備午餐／不訂餐」。</li>
-              <li>若有特殊需求，歡迎提前與學校聯繫。</li>
+              <li>實際開班與收費方式以學校公告為準。</li>
+              <li>補助身分請依學校通知繳交證明文件。</li>
+              <li>送出後若需修改，請聯絡學校承辦人員。</li>
+              <li>填寫資料僅作課後照顧班報名與行政聯繫使用。</li>
             </ul>
           </section>
 
@@ -252,7 +252,7 @@
 
       <aside class="summary-panel" aria-live="polite">
         <h2>報名摘要</h2>
-        <div id="summaryContent" class="summary-empty">送出表單後會在這裡顯示確認內容。</div>
+        <div id="summaryContent" class="summary-empty">送出後會在這裡顯示本次報名內容。</div>
       </aside>
     </main>
 

@@ -1,49 +1,60 @@
 # 力行國小課後照顧班報名網頁
 
-這是一個可部署到 GitHub Pages 的靜態報名網頁，資料儲存在 Firebase Firestore，招生簡章 PDF 可透過 Firebase Storage 更新。
+這是一個可部署到 GitHub Pages 的課後照顧班報名網站，資料寫入 Firebase Firestore，後台可登入查看報名狀況、設定報名學期、匯出 CSV，並更換招生簡章 PDF。
+
+## 目前功能
+
+- 家長需先另開閱讀招生簡章，才能勾選確認並送出。
+- 班級可輸入 `二年三班`、`2 年 3 班`、`203`，系統會自動判讀目前年級。
+- 後台可設定報名學期：
+  - 下一學年度上學期：學生升一個年級後報名。
+  - 本學年度下學期：學生不升級，依目前年級報名。
+- 年段可選日數：
+  - 低年級：星期一、三、四、五。
+  - 中年級：星期三、五。
+  - 高年級：星期三。
+- 後台可查看名冊、統計、搜尋與匯出 CSV。
+- 後台可更換簡章 PDF；目前使用 Firestore 儲存小型 PDF，不需要啟用 Firebase Storage。
 
 ## Firebase 設定
 
-1. 到 Firebase Console 建立專案。
-2. 建立 Web App，複製 Firebase config。
-3. 啟用 Firestore Database。
-4. 啟用 Storage。
-5. 啟用 Authentication 的 Email/Password。
-6. 建立一個後台管理者帳號。
-7. 將 Firebase config 貼到 `firebase-config.js`。
+專案 ID：`after-school-registration`
 
-`firebase-config.js` 目前是空白範本，未填入前可以看頁面，但無法送出報名或讀取後台資料。
+已完成：
 
-## 後台密碼
+- Firestore Database 已建立。
+- Firestore Security Rules 已部署。
+- 網頁已接上 Firebase Web App 設定。
 
-後台頁面 `admin.html` 使用 Firebase Authentication 的 Email / Password 登入。
+還需要在 Firebase Console 手動完成：
 
-請在 Firebase Console 啟用 Authentication：
+1. 到 Authentication。
+2. 點選「開始使用」。
+3. 在 Sign-in method 啟用 Email/Password。
+4. 到 Users 新增一個後台管理帳號與密碼。
 
-1. Authentication > Sign-in method
-2. 啟用 Email/Password
-3. 到 Users 新增一位後台管理者
-4. 使用該 Email 與密碼登入後台
+Firestore 規則設計：
 
-Firestore / Storage 規則已設定為：
+- 家長報名頁只能新增 `registrations`。
+- 後台登入後才能讀取報名資料。
+- `settings/app` 可公開讀取，登入後台後才能修改。
 
-- 家長可以新增報名資料
-- 只有登入的後台帳號可以讀取報名資料
-- 只有登入的後台帳號可以修改設定與上傳簡章
+## 簡章檔案
 
-## Firestore 資料
+預設簡章放在：
 
-- `registrations`：家長送出的報名資料。
-- `settings/app`：後台設定，目前包含報名期別與招生簡章檔案資訊。
+`brochures/115-1課後照顧班招生簡章(二到六年級).pdf`
 
-## 部署到 GitHub Pages
+後台上傳新簡章時，PDF 會寫入 Firestore 的 `settings/app`。Firestore 單筆文件有大小限制，所以後台限制 PDF 小於 650 KB。若未來簡章檔案較大，建議改用 Google Drive 分享連結，或再啟用 Firebase Storage。
 
-在 GitHub repository 的 Settings > Pages 中選擇：
+## GitHub Pages
 
-- Source: Deploy from a branch
-- Branch: `main`
-- Folder: `/root`
+GitHub Pages 設定建議：
 
-## 注意
+- Source：Deploy from a branch
+- Branch：`main`
+- Folder：`/root`
 
-前台與後台目前都直接透過 Firebase SDK 存取資料。正式開放前，請依學校需求設定 Firebase Security Rules。
+部署後網址：
+
+https://pingking0220.github.io/lixing-after-school-registration/

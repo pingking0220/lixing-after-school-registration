@@ -1,4 +1,4 @@
-import { firebaseConfig, defaultSettings } from "./firebase-config.js";
+import { defaultSettings, firebaseConfig } from "./firebase-config.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import {
   getAuth,
@@ -18,40 +18,34 @@ import {
   serverTimestamp,
   setDoc
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
-import {
-  getDownloadURL,
-  getStorage,
-  ref,
-  uploadBytes
-} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-storage.js";
 
 const termLabels = {
   nextYearFirst: "下一學年度上學期",
-  sameYearSecond: "同學年度下學期"
+  sameYearSecond: "本學年度下學期"
 };
+
+const maxFirestorePdfBytes = 650 * 1024;
+
+let app;
+let auth;
+let db;
 
 function isConfigured() {
   return Boolean(firebaseConfig.apiKey && firebaseConfig.projectId && firebaseConfig.appId);
 }
 
-let app;
-let auth;
-let db;
-let storage;
-
 function ensureFirebase() {
   if (!isConfigured()) {
-    throw new Error("尚未設定 Firebase，請先填寫 firebase-config.js。");
+    throw new Error("尚未設定 Firebase，請先確認 firebase-config.js。");
   }
 
   if (!app) {
     app = initializeApp(firebaseConfig);
     auth = getAuth(app);
     db = getFirestore(app);
-    storage = getStorage(app);
   }
 
-  return { auth, db, storage };
+  return { auth, db };
 }
 
 function normalizeSettings(settings = {}) {
@@ -72,15 +66,21 @@ function timestampText(value) {
   return String(value);
 }
 
+function fileToDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.addEventListener("load", () => resolve(reader.result));
+    reader.addEventListener("error", () => reject(reader.error || new Error("簡章讀取失敗。")));
+    reader.readAsDataURL(file);
+  });
+}
+
 export async function loadSettings() {
   if (!isConfigured()) return normalizeSettings();
 
   const { db } = ensureFirebase();
   const snap = await getDoc(doc(db, "settings", "app"));
-  if (!snap.exists()) {
-    await setDoc(doc(db, "settings", "app"), defaultSettings, { merge: true });
-    return normalizeSettings();
-  }
+  if (!snap.exists()) return normalizeSettings();
   return normalizeSettings(snap.data());
 }
 
@@ -101,8 +101,11 @@ export function watchAdminAuth(callback) {
 
 export async function saveSettings(settings) {
   const { db } = ensureFirebase();
-  const clean = normalizeSettings(settings);
-  await setDoc(doc(db, "settings", "app"), clean, { merge: true });
+  const settingsRef = doc(db, "settings", "app");
+  const snap = await getDoc(settingsRef);
+  const current = snap.exists() ? snap.data() : defaultSettings;
+  const clean = normalizeSettings({ ...current, ...settings });
+  await setDoc(settingsRef, clean, { merge: true });
   return clean;
 }
 
@@ -137,31 +140,34 @@ export function buildStats(items) {
   const byLunchMap = new Map();
 
   items.forEach((item) => {
-    byBandMap.set(item.enrollmentBand, (byBandMap.get(item.enrollmentBand) || 0) + 1);
-    byLunchMap.set(item.lunch, (byLunchMap.get(item.lunch) || 0) + 1);
+    if (item.enrollmentBand) {
+      byBandMap.set(item.enrollmentBand, (byBandMap.get(item.enrollmentBand) || 0) + 1);
+    }
+    if (item.lunch) {
+      byLunchMap.set(item.lunch, (byLunchMap.get(item.lunch) || 0) + 1);
+    }
   });
 
   return {
     total: items.length,
     extended: items.filter((item) => item.extended === "是").length,
-    byBand: [...byBandMap].filter(([label]) => label).map(([enrollmentBand, count]) => ({ enrollmentBand, count })),
-    byLunch: [...byLunchMap].filter(([label]) => label).map(([lunch, count]) => ({ lunch, count }))
+    byBand: [...byBandMap].map(([enrollmentBand, count]) => ({ enrollmentBand, count })),
+    byLunch: [...byLunchMap].map(([lunch, count]) => ({ lunch, count }))
   };
 }
 
 export async function uploadBrochure(file) {
-  if (!file || file.type !== "application/pdf") {
+  if (!file || (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf"))) {
     throw new Error("請上傳 PDF 檔案。");
   }
 
-  const { storage } = ensureFirebase();
-  const safeName = file.name.replace(/[<>:"/\\|?*]+/g, "_");
-  const brochureRef = ref(storage, `brochures/${Date.now()}-${safeName}`);
-  await uploadBytes(brochureRef, file, { contentType: "application/pdf" });
-  const url = await getDownloadURL(brochureRef);
-  const settings = await saveSettings({
-    brochurePath: url,
+  if (file.size > maxFirestorePdfBytes) {
+    throw new Error("PDF 檔案超過 650 KB。若簡章較大，請改用 Google Drive 分享連結或啟用 Firebase Storage。");
+  }
+
+  const dataUrl = await fileToDataUrl(file);
+  return saveSettings({
+    brochurePath: dataUrl,
     brochureName: file.name
   });
-  return settings;
 }

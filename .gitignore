@@ -1,3 +1,6 @@
 registrations.db
+firebase.exe
+firepit-log.txt
+firebase-debug.log
 __pycache__/
 *.pyc

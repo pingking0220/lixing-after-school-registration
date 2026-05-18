@@ -22,8 +22,23 @@ const brochureForm = document.querySelector("#brochureForm");
 const brochureMessage = document.querySelector("#brochureMessage");
 const currentBrochureLink = document.querySelector("#currentBrochureLink");
 const exportCsvButton = document.querySelector("#exportCsvButton");
+
 let registrations = [];
 let hasLoadedAdmin = false;
+
+function friendlyError(error) {
+  const code = error?.code || "";
+  if (code === "auth/operation-not-allowed") {
+    return "Firebase Authentication 尚未啟用 Email/Password，請先到 Firebase Console 開啟。";
+  }
+  if (code === "auth/invalid-credential" || code === "auth/user-not-found" || code === "auth/wrong-password") {
+    return "帳號或密碼不正確。";
+  }
+  if (code === "permission-denied") {
+    return "目前帳號沒有讀寫權限，請確認已登入後台帳號。";
+  }
+  return error?.message || "發生未知錯誤。";
+}
 
 function showAdmin() {
   adminLogin.hidden = true;
@@ -56,6 +71,7 @@ function matchRow(item, keyword) {
 function appendCell(row, text) {
   const cell = document.createElement("td");
   cell.textContent = text || "";
+  cell.style.whiteSpace = "pre-line";
   row.append(cell);
 }
 
@@ -64,7 +80,7 @@ function renderRows() {
   const filtered = registrations.filter((item) => matchRow(item, keyword));
 
   if (!filtered.length) {
-    rowsBody.innerHTML = '<tr><td colspan="10">目前沒有符合條件的報名資料</td></tr>';
+    rowsBody.innerHTML = '<tr><td colspan="10">目前沒有符合條件的報名資料。</td></tr>';
     return;
   }
 
@@ -73,14 +89,14 @@ function renderRows() {
       const row = document.createElement("tr");
       appendCell(row, item.id);
       appendCell(row, item.submitted_at);
-      appendCell(row, `${item.studentName}\n${item.gender}`);
+      appendCell(row, `${item.studentName || ""}\n${item.gender || ""}`);
       appendCell(row, item.className);
-      appendCell(row, `${item.enrollmentGrade}\n${item.enrollmentBand}`);
-      appendCell(row, `${item.care}\n${Array.isArray(item.careDays) ? item.careDays.join("、") : item.careDays || ""}`);
-      appendCell(row, `${item.extended}\n${Array.isArray(item.extendedDays) ? item.extendedDays.join("、") : item.extendedDays || ""}`);
+      appendCell(row, `${item.enrollmentGrade || ""}\n${item.enrollmentBand || ""}`);
+      appendCell(row, `${item.care || ""}\n${Array.isArray(item.careDays) ? item.careDays.join("、") : item.careDays || ""}`);
+      appendCell(row, `${item.extended || ""}\n${Array.isArray(item.extendedDays) ? item.extendedDays.join("、") : item.extendedDays || ""}`);
       appendCell(row, item.lunch);
-      appendCell(row, `${item.subsidy}\n${Array.isArray(item.subsidyTypes) ? item.subsidyTypes.join("、") : item.subsidyTypes || ""}`);
-      appendCell(row, `${item.parentName}\n${item.parentPhone}\n${item.email}`);
+      appendCell(row, `${item.subsidy || ""}\n${Array.isArray(item.subsidyTypes) ? item.subsidyTypes.join("、") : item.subsidyTypes || ""}`);
+      appendCell(row, `${item.parentName || ""}\n${item.parentPhone || ""}\n${item.email || ""}`);
       return row;
     })
   );
@@ -107,19 +123,19 @@ function exportCsv() {
     "性別",
     "班級",
     "家長姓名",
-    "家長手機",
+    "家長電話",
     "Email",
     "報名學期",
     "目前年級",
-    "報名時年級",
-    "報名時年段",
-    "課後照顧班",
-    "課後照顧班日期",
-    "延長班",
-    "延長班日期",
+    "報名年級",
+    "報名年段",
+    "課後照顧",
+    "課後照顧日數",
+    "延長照顧",
+    "延長照顧日數",
     "午餐",
-    "減免身分",
-    "減免身分別",
+    "補助",
+    "補助身分",
     "備註"
   ];
   const rows = registrations.map((item) => [
@@ -145,7 +161,7 @@ function exportCsv() {
     item.notes
   ]);
 
-  const csv = [headers, ...rows].map((row) => row.map(csvValue).join(",")).join("\n");
+  const csv = [headers, ...rows].map((row) => row.map(csvValue).join(",")).join("\r\n");
   const blob = new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
@@ -155,13 +171,23 @@ function exportCsv() {
   URL.revokeObjectURL(url);
 }
 
+function updateBrochureLink(settings) {
+  if (!settings.brochurePath) {
+    currentBrochureLink.removeAttribute("href");
+    currentBrochureLink.textContent = "尚未設定";
+    return;
+  }
+
+  currentBrochureLink.href = settings.brochurePath;
+  currentBrochureLink.textContent = settings.brochureName || "開啟目前簡章";
+}
+
 async function loadAdmin() {
   const [items, settings] = await Promise.all([listRegistrations(), loadSettings()]);
   registrations = items;
 
   settingsForm.querySelector('[name="registrationTerm"]').value = settings.registrationTerm;
-  currentBrochureLink.href = settings.brochurePath || "#";
-  currentBrochureLink.textContent = settings.brochureName || "尚未設定";
+  updateBrochureLink(settings);
   renderStats();
   renderRows();
 }
@@ -177,9 +203,9 @@ settingsForm.addEventListener("submit", async (event) => {
     const result = await saveSettings({
       registrationTerm: settingsForm.querySelector('[name="registrationTerm"]').value
     });
-    settingsMessage.textContent = `已設定為：${result.registrationTermLabel}`;
+    settingsMessage.textContent = `已儲存：${result.registrationTermLabel}`;
   } catch (error) {
-    settingsMessage.textContent = `設定未儲存：${error.message}`;
+    settingsMessage.textContent = `設定儲存失敗：${friendlyError(error)}`;
   }
 });
 
@@ -190,12 +216,11 @@ brochureForm.addEventListener("submit", async (event) => {
   try {
     const file = brochureForm.querySelector('[name="brochure"]').files[0];
     const result = await uploadBrochure(file);
-    currentBrochureLink.href = result.brochurePath;
-    currentBrochureLink.textContent = result.brochureName;
+    updateBrochureLink(result);
     brochureForm.reset();
-    brochureMessage.textContent = "招生簡章已更新";
+    brochureMessage.textContent = "招生簡章已更新。";
   } catch (error) {
-    brochureMessage.textContent = `招生簡章未更新：${error.message}`;
+    brochureMessage.textContent = `招生簡章更新失敗：${friendlyError(error)}`;
   }
 });
 
@@ -207,7 +232,7 @@ adminLoginForm.addEventListener("submit", async (event) => {
     await signInAdmin(adminLoginForm.adminEmail.value.trim(), adminLoginForm.adminPassword.value);
     loginMessage.textContent = "";
   } catch (error) {
-    loginMessage.textContent = `登入失敗：${error.message}`;
+    loginMessage.textContent = `登入失敗：${friendlyError(error)}`;
   }
 });
 
@@ -227,11 +252,11 @@ try {
     if (!hasLoadedAdmin) {
       hasLoadedAdmin = true;
       loadAdmin().catch((error) => {
-        rowsBody.innerHTML = `<tr><td colspan="10">後台資料載入失敗：${error.message}</td></tr>`;
+        rowsBody.innerHTML = `<tr><td colspan="10">後台資料載入失敗：${friendlyError(error)}</td></tr>`;
       });
     }
   });
 } catch (error) {
-  loginMessage.textContent = error.message;
+  loginMessage.textContent = friendlyError(error);
   showLogin();
 }
