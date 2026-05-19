@@ -40,6 +40,55 @@
         </div>
       </header>
 
+      <section class="stat-grid" aria-label="報名統計">
+        <article>
+          <span>總報名數</span>
+          <strong id="totalCount">0</strong>
+        </article>
+        <article>
+          <span>延長照顧</span>
+          <strong id="extendedCount">0</strong>
+        </article>
+        <article>
+          <span>年段統計</span>
+          <strong id="bandSummary">-</strong>
+        </article>
+        <article>
+          <span>午餐統計</span>
+          <strong id="lunchSummary">-</strong>
+        </article>
+      </section>
+
+      <section class="admin-table-panel">
+        <div class="table-toolbar">
+          <h2>報名名冊</h2>
+          <input id="searchBox" type="search" placeholder="搜尋學生、班級、家長、電話或 Email">
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>送出時間</th>
+                <th>學生</th>
+                <th>班級</th>
+                <th>報名年段</th>
+                <th>課後照顧</th>
+                <th>延長照顧</th>
+                <th>午餐</th>
+                <th>補助</th>
+                <th>家長聯絡</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="registrationRows">
+              <tr>
+                <td colspan="10">載入中</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
       <section class="settings-panel">
         <div>
           <h2>報名學期設定</h2>
@@ -102,55 +151,6 @@
           <button class="primary-button" type="submit">新增後台帳號</button>
           <p id="adminAccountMessage" class="settings-message" aria-live="polite"></p>
         </form>
-      </section>
-
-      <section class="stat-grid" aria-label="報名統計">
-        <article>
-          <span>總報名數</span>
-          <strong id="totalCount">0</strong>
-        </article>
-        <article>
-          <span>延長照顧</span>
-          <strong id="extendedCount">0</strong>
-        </article>
-        <article>
-          <span>年段統計</span>
-          <strong id="bandSummary">-</strong>
-        </article>
-        <article>
-          <span>午餐統計</span>
-          <strong id="lunchSummary">-</strong>
-        </article>
-      </section>
-
-      <section class="admin-table-panel">
-        <div class="table-toolbar">
-          <h2>報名名冊</h2>
-          <input id="searchBox" type="search" placeholder="搜尋學生、班級、家長、電話或 Email">
-        </div>
-        <div class="table-scroll">
-          <table>
-            <thead>
-              <tr>
-                <th>送出時間</th>
-                <th>學生</th>
-                <th>班級</th>
-                <th>報名年段</th>
-                <th>課後照顧</th>
-                <th>延長照顧</th>
-                <th>午餐</th>
-                <th>補助</th>
-                <th>家長聯絡</th>
-                <th>操作</th>
-              </tr>
-            </thead>
-            <tbody id="registrationRows">
-              <tr>
-                <td colspan="10">載入中</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
       </section>
     </main>
 
