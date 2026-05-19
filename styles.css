@@ -121,20 +121,6 @@ h1 {
   font-weight: 600;
 }
 
-.admin-shortcut {
-  min-height: 40px;
-  width: fit-content;
-  display: inline-flex;
-  align-items: center;
-  margin-top: 18px;
-  border-radius: 8px;
-  padding: 0 14px;
-  color: #fff;
-  background: var(--blue);
-  text-decoration: none;
-  font-weight: 800;
-}
-
 form {
   padding: clamp(20px, 4vw, 40px);
 }
