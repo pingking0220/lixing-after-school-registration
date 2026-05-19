@@ -84,6 +84,26 @@
         </form>
       </section>
 
+      <section class="settings-panel account-settings-panel">
+        <div>
+          <h2>後台帳號管理</h2>
+          <p>新增可登入後台的 Email 帳號；移除時只會取消後台權限，不會刪除 Firebase Auth 帳號。</p>
+          <div id="adminAccountsList" class="admin-accounts-list" aria-live="polite"></div>
+        </div>
+        <form id="adminAccountForm" class="settings-form account-settings-form">
+          <label>
+            <span>新增後台 Email</span>
+            <input type="email" name="adminAccountEmail" autocomplete="off" required>
+          </label>
+          <label>
+            <span>初始密碼</span>
+            <input type="password" name="adminAccountPassword" autocomplete="new-password" minlength="6" required>
+          </label>
+          <button class="primary-button" type="submit">新增後台帳號</button>
+          <p id="adminAccountMessage" class="settings-message" aria-live="polite"></p>
+        </form>
+      </section>
+
       <section class="stat-grid" aria-label="報名統計">
         <article>
           <span>總報名數</span>

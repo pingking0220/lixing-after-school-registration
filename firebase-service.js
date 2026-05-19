@@ -1,6 +1,7 @@
 import { defaultSettings, firebaseConfig } from "./firebase-config.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import {
+  createUserWithEmailAndPassword,
   getAuth,
   onAuthStateChanged,
   signInWithEmailAndPassword,
@@ -8,6 +9,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 import {
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -30,6 +32,8 @@ const maxFirestorePdfBytes = 650 * 1024;
 let app;
 let auth;
 let db;
+let adminCreatorApp;
+let adminCreatorAuth;
 
 function isConfigured() {
   return Boolean(firebaseConfig.apiKey && firebaseConfig.projectId && firebaseConfig.appId);
@@ -47,6 +51,14 @@ function ensureFirebase() {
   }
 
   return { auth, db };
+}
+
+function ensureAdminCreatorAuth() {
+  if (!adminCreatorApp) {
+    adminCreatorApp = initializeApp(firebaseConfig, "admin-user-creator");
+    adminCreatorAuth = getAuth(adminCreatorApp);
+  }
+  return adminCreatorAuth;
 }
 
 function normalizeSettings(settings = {}) {
@@ -128,6 +140,51 @@ export async function saveSettings(settings) {
   const clean = normalizeSettings({ ...current, ...settings });
   await setDoc(settingsRef, clean, { merge: true });
   return clean;
+}
+
+export async function listAdminAccounts() {
+  const { db } = ensureFirebase();
+  const snap = await getDocs(query(collection(db, "adminUsers"), orderBy("createdAt", "asc")));
+  const items = snap.docs.map((item) => ({ id: item.id, ...item.data() }));
+  if (!items.some((item) => item.email === "k79204@gmail.com" || item.id === "k79204@gmail.com")) {
+    items.unshift({
+      id: "k79204@gmail.com",
+      email: "k79204@gmail.com",
+      builtin: true
+    });
+  }
+  return items;
+}
+
+export async function createAdminAccount(email, password) {
+  const { db } = ensureFirebase();
+  const cleanEmail = String(email || "").trim().toLowerCase();
+  if (!cleanEmail) throw new Error("請輸入 Email。");
+  if (!password || password.length < 6) throw new Error("密碼至少需要 6 個字元。");
+
+  const secondaryAuth = ensureAdminCreatorAuth();
+  try {
+    await createUserWithEmailAndPassword(secondaryAuth, cleanEmail, password);
+  } catch (error) {
+    if (error.code !== "auth/email-already-in-use") throw error;
+  } finally {
+    await signOut(secondaryAuth).catch(() => {});
+  }
+
+  await setDoc(doc(db, "adminUsers", cleanEmail), {
+    email: cleanEmail,
+    createdAt: serverTimestamp()
+  }, { merge: true });
+  return { email: cleanEmail };
+}
+
+export async function removeAdminAccess(email) {
+  const { db } = ensureFirebase();
+  const cleanEmail = String(email || "").trim().toLowerCase();
+  if (cleanEmail === "k79204@gmail.com") {
+    throw new Error("主要管理員帳號不可移除。");
+  }
+  await deleteDoc(doc(db, "adminUsers", cleanEmail));
 }
 
 export async function createRegistration(payload) {

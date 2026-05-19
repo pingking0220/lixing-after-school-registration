@@ -4,7 +4,14 @@ service cloud.firestore {
   match /databases/{database}/documents {
     function isAdmin() {
       return request.auth != null
-        && request.auth.token.email in ['k79204@gmail.com'];
+        && (
+          request.auth.token.email in ['k79204@gmail.com']
+          || exists(/databases/$(database)/documents/adminUsers/$(request.auth.token.email))
+        );
+    }
+
+    match /adminUsers/{email} {
+      allow read, create, update, delete: if isAdmin();
     }
 
     match /registrations/{docId} {

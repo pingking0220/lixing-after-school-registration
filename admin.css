@@ -112,6 +112,44 @@
   padding: 0;
 }
 
+.account-settings-panel {
+  align-items: start;
+}
+
+.account-settings-panel > div {
+  min-width: 0;
+}
+
+.account-settings-form {
+  grid-template-columns: 1fr;
+}
+
+.admin-accounts-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.admin-account-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f8fbf8;
+}
+
+.admin-account-row span {
+  overflow-wrap: anywhere;
+  font-weight: 800;
+}
+
+.admin-account-row small {
+  color: var(--muted);
+}
+
 .term-settings-form {
   min-width: min(640px, 100%);
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -332,6 +370,11 @@ td {
   .modal-actions .primary-button,
   .modal-actions .ghost-button {
     width: 100%;
+  }
+
+  .admin-account-row {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .stat-grid {

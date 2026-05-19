@@ -1,8 +1,11 @@
 import {
   buildStats,
+  createAdminAccount,
   deleteRegistration,
+  listAdminAccounts,
   listRegistrations,
   loadSettings,
+  removeAdminAccess,
   saveSettings,
   signInAdmin,
   signOutAdmin,
@@ -24,6 +27,9 @@ const brochureForm = document.querySelector("#brochureForm");
 const brochureMessage = document.querySelector("#brochureMessage");
 const currentBrochureLink = document.querySelector("#currentBrochureLink");
 const exportCsvButton = document.querySelector("#exportCsvButton");
+const adminAccountForm = document.querySelector("#adminAccountForm");
+const adminAccountMessage = document.querySelector("#adminAccountMessage");
+const adminAccountsList = document.querySelector("#adminAccountsList");
 const editDialog = document.querySelector("#editDialog");
 const editRegistrationForm = document.querySelector("#editRegistrationForm");
 const closeEditButton = document.querySelector("#closeEditButton");
@@ -31,6 +37,7 @@ const cancelEditButton = document.querySelector("#cancelEditButton");
 const editMessage = document.querySelector("#editMessage");
 
 let registrations = [];
+let adminAccounts = [];
 let hasLoadedAdmin = false;
 
 function friendlyError(error) {
@@ -204,6 +211,56 @@ function renderStats() {
   document.querySelector("#lunchSummary").textContent = summarize(stats.byLunch, "lunch");
 }
 
+function renderAdminAccounts() {
+  if (!adminAccounts.length) {
+    adminAccountsList.textContent = "尚未載入管理員清單。";
+    return;
+  }
+
+  adminAccountsList.replaceChildren(
+    ...adminAccounts.map((account) => {
+      const email = account.email || account.id;
+      const item = document.createElement("div");
+      item.className = "admin-account-row";
+
+      const label = document.createElement("span");
+      label.textContent = email;
+
+      const badge = document.createElement("small");
+      badge.textContent = email === "k79204@gmail.com" ? "主要管理員" : "可登入後台";
+
+      item.append(label, badge);
+
+      if (email !== "k79204@gmail.com") {
+        const removeButton = document.createElement("button");
+        removeButton.className = "ghost-link danger-action small-action";
+        removeButton.type = "button";
+        removeButton.textContent = "移除權限";
+        removeButton.addEventListener("click", async () => {
+          const ok = window.confirm(`確定要移除 ${email} 的後台權限嗎？`);
+          if (!ok) return;
+          removeButton.disabled = true;
+          try {
+            await removeAdminAccess(email);
+            await loadAdminAccounts();
+          } catch (error) {
+            window.alert(`移除失敗：${friendlyError(error)}`);
+            removeButton.disabled = false;
+          }
+        });
+        item.append(removeButton);
+      }
+
+      return item;
+    })
+  );
+}
+
+async function loadAdminAccounts() {
+  adminAccounts = await listAdminAccounts();
+  renderAdminAccounts();
+}
+
 function csvValue(value) {
   const text = Array.isArray(value) ? value.join("、") : String(value || "");
   return `"${text.replace(/"/g, '""')}"`;
@@ -279,13 +336,15 @@ function updateBrochureLink(settings) {
 }
 
 async function loadAdmin() {
-  const [items, settings] = await Promise.all([listRegistrations(), loadSettings()]);
+  const [items, settings, accounts] = await Promise.all([listRegistrations(), loadSettings(), listAdminAccounts()]);
   registrations = items;
+  adminAccounts = accounts;
 
   settingsForm.querySelector('[name="schoolYear"]').value = settings.schoolYear;
   settingsForm.querySelector('[name="semester"]').value = settings.semester;
   settingsForm.querySelector('[name="registrationTerm"]').value = settings.registrationTerm;
   updateBrochureLink(settings);
+  renderAdminAccounts();
   renderStats();
   renderRows();
 }
@@ -364,6 +423,22 @@ brochureForm.addEventListener("submit", async (event) => {
     brochureMessage.textContent = "招生簡章已更新。";
   } catch (error) {
     brochureMessage.textContent = `招生簡章更新失敗：${friendlyError(error)}`;
+  }
+});
+
+adminAccountForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  adminAccountMessage.textContent = "新增中";
+
+  try {
+    const email = adminAccountForm.adminAccountEmail.value.trim();
+    const password = adminAccountForm.adminAccountPassword.value;
+    const result = await createAdminAccount(email, password);
+    adminAccountForm.reset();
+    adminAccountMessage.textContent = `已新增後台帳號：${result.email}`;
+    await loadAdminAccounts();
+  } catch (error) {
+    adminAccountMessage.textContent = `新增失敗：${friendlyError(error)}`;
   }
 });
 
