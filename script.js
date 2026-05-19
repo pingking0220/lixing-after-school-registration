@@ -22,7 +22,6 @@ const submitButton = document.querySelector("#submitButton");
 const confirmSubmitButton = document.querySelector("#confirmSubmitButton");
 const successDialog = document.querySelector("#successDialog");
 const successMessage = document.querySelector("#successMessage");
-const successRegistrationId = document.querySelector("#successRegistrationId");
 const successCloseButton = document.querySelector("#successCloseButton");
 const lookupForm = document.querySelector("#lookupForm");
 const lookupMessage = document.querySelector("#lookupMessage");
@@ -162,7 +161,6 @@ function setConfirmationMode(enabled) {
 
 function showSuccessMessage(payload, result) {
   successMessage.textContent = `${payload.studentName} 的 ${payload.registrationTerm} 課後照顧班報名已完成。可用學生姓名與家長電話查詢報名狀態。`;
-  successRegistrationId.textContent = result.id;
   successDialog.hidden = false;
   successCloseButton.focus();
 }
@@ -313,8 +311,7 @@ function addSummaryRow(list, label, value) {
 function renderSummary(payload, submitResult = {}) {
   const list = document.createElement("dl");
 
-  if (submitResult.id) {
-    addSummaryRow(list, "報名編號", String(submitResult.id));
+  if (submitResult.submitted_at) {
     addSummaryRow(list, "送出時間", submitResult.submitted_at);
   }
 

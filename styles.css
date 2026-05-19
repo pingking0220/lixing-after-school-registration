@@ -575,12 +575,6 @@ textarea:focus {
   line-height: 1.7;
 }
 
-.success-id {
-  padding: 12px;
-  border-radius: 8px;
-  background: #eef7f1;
-}
-
 .success-card .primary-button {
   width: 100%;
 }

@@ -80,14 +80,13 @@ function renderRows() {
   const filtered = registrations.filter((item) => matchRow(item, keyword));
 
   if (!filtered.length) {
-    rowsBody.innerHTML = '<tr><td colspan="10">目前沒有符合條件的報名資料。</td></tr>';
+    rowsBody.innerHTML = '<tr><td colspan="9">目前沒有符合條件的報名資料。</td></tr>';
     return;
   }
 
   rowsBody.replaceChildren(
     ...filtered.map((item) => {
       const row = document.createElement("tr");
-      appendCell(row, item.id);
       appendCell(row, item.submitted_at);
       appendCell(row, `${item.studentName || ""}\n${item.gender || ""}`);
       appendCell(row, item.className);
@@ -121,7 +120,6 @@ function normalizeYear(value) {
 
 function exportCsv() {
   const headers = [
-    "編號",
     "送出時間",
     "學生姓名",
     "性別",
@@ -143,7 +141,6 @@ function exportCsv() {
     "備註"
   ];
   const rows = registrations.map((item) => [
-    item.id,
     item.submitted_at,
     item.studentName,
     item.gender,
@@ -263,7 +260,7 @@ try {
     if (!hasLoadedAdmin) {
       hasLoadedAdmin = true;
       loadAdmin().catch((error) => {
-        rowsBody.innerHTML = `<tr><td colspan="10">後台資料載入失敗：${friendlyError(error)}</td></tr>`;
+        rowsBody.innerHTML = `<tr><td colspan="9">後台資料載入失敗：${friendlyError(error)}</td></tr>`;
       });
     }
   });
