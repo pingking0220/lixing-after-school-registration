@@ -121,17 +121,123 @@
                 <th>午餐</th>
                 <th>補助</th>
                 <th>家長聯絡</th>
+                <th>操作</th>
               </tr>
             </thead>
             <tbody id="registrationRows">
               <tr>
-                <td colspan="9">載入中</td>
+                <td colspan="10">載入中</td>
               </tr>
             </tbody>
           </table>
         </div>
       </section>
     </main>
+
+    <div class="admin-modal" id="editDialog" role="dialog" aria-modal="true" aria-labelledby="editTitle" hidden>
+      <section class="admin-modal-card">
+        <div class="modal-heading">
+          <h2 id="editTitle">編輯報名資料</h2>
+          <button class="ghost-link" id="closeEditButton" type="button">關閉</button>
+        </div>
+        <form id="editRegistrationForm" class="edit-registration-form">
+          <label>
+            <span>學生姓名</span>
+            <input type="text" name="studentName" required>
+          </label>
+          <label>
+            <span>性別</span>
+            <select name="gender">
+              <option value="">未填寫</option>
+              <option value="男">男</option>
+              <option value="女">女</option>
+            </select>
+          </label>
+          <label>
+            <span>班級</span>
+            <input type="text" name="className" required>
+          </label>
+          <label>
+            <span>家長姓名</span>
+            <input type="text" name="parentName" required>
+          </label>
+          <label>
+            <span>家長電話</span>
+            <input type="tel" name="parentPhone" required>
+          </label>
+          <label>
+            <span>Email</span>
+            <input type="email" name="email">
+          </label>
+          <label>
+            <span>報名學期</span>
+            <input type="text" name="registrationTerm">
+          </label>
+          <label>
+            <span>目前年級</span>
+            <input type="text" name="currentGrade">
+          </label>
+          <label>
+            <span>報名年級</span>
+            <input type="text" name="enrollmentGrade">
+          </label>
+          <label>
+            <span>報名年段</span>
+            <select name="enrollmentBand">
+              <option value="">未填寫</option>
+              <option value="低年級">低年級</option>
+              <option value="中年級">中年級</option>
+              <option value="高年級">高年級</option>
+            </select>
+          </label>
+          <label>
+            <span>課後照顧</span>
+            <select name="care">
+              <option value="">未填寫</option>
+              <option value="是">是</option>
+              <option value="否">否</option>
+            </select>
+          </label>
+          <label>
+            <span>課後照顧日數</span>
+            <input type="text" name="careDays" placeholder="例：星期三、星期五">
+          </label>
+          <label>
+            <span>延長照顧</span>
+            <select name="extended">
+              <option value="">未填寫</option>
+              <option value="是">是</option>
+              <option value="否">否</option>
+            </select>
+          </label>
+          <label>
+            <span>延長照顧日數</span>
+            <input type="text" name="extendedDays" placeholder="例：星期一、星期三">
+          </label>
+          <label>
+            <span>午餐</span>
+            <input type="text" name="lunch">
+          </label>
+          <label>
+            <span>補助</span>
+            <input type="text" name="subsidy">
+          </label>
+          <label class="full">
+            <span>補助身分</span>
+            <input type="text" name="subsidyTypes" placeholder="可用頓號、逗號或換行分隔">
+          </label>
+          <label class="full">
+            <span>備註</span>
+            <textarea name="notes" rows="4"></textarea>
+          </label>
+          <div class="modal-actions">
+            <button class="ghost-button" id="cancelEditButton" type="button">取消</button>
+            <button class="primary-button" type="submit">儲存修改</button>
+          </div>
+          <p id="editMessage" class="settings-message" aria-live="polite"></p>
+        </form>
+      </section>
+    </div>
 
     <script type="module" src="admin.js"></script>
   </body>

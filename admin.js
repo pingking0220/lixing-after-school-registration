@@ -1,10 +1,12 @@
 import {
   buildStats,
+  deleteRegistration,
   listRegistrations,
   loadSettings,
   saveSettings,
   signInAdmin,
   signOutAdmin,
+  updateRegistration,
   uploadBrochure,
   watchAdminAuth
 } from "./firebase-service.js";
@@ -22,6 +24,11 @@ const brochureForm = document.querySelector("#brochureForm");
 const brochureMessage = document.querySelector("#brochureMessage");
 const currentBrochureLink = document.querySelector("#currentBrochureLink");
 const exportCsvButton = document.querySelector("#exportCsvButton");
+const editDialog = document.querySelector("#editDialog");
+const editRegistrationForm = document.querySelector("#editRegistrationForm");
+const closeEditButton = document.querySelector("#closeEditButton");
+const cancelEditButton = document.querySelector("#cancelEditButton");
+const editMessage = document.querySelector("#editMessage");
 
 let registrations = [];
 let hasLoadedAdmin = false;
@@ -75,12 +82,99 @@ function appendCell(row, text) {
   row.append(cell);
 }
 
+function arrayText(value) {
+  return Array.isArray(value) ? value.join("、") : value || "";
+}
+
+function textToArray(value) {
+  return value
+    .split(/[、,\n]/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function currentItem(id) {
+  return registrations.find((item) => item.id === id);
+}
+
+function setField(name, value) {
+  editRegistrationForm.querySelector(`[name="${name}"]`).value = value || "";
+}
+
+function formValue(name) {
+  return editRegistrationForm.querySelector(`[name="${name}"]`).value.trim();
+}
+
+function openEditDialog(item) {
+  editRegistrationForm.dataset.registrationId = item.id;
+  editMessage.textContent = "";
+  setField("studentName", item.studentName);
+  setField("gender", item.gender);
+  setField("className", item.className);
+  setField("parentName", item.parentName);
+  setField("parentPhone", item.parentPhone);
+  setField("email", item.email);
+  setField("registrationTerm", item.registrationTerm);
+  setField("currentGrade", item.currentGrade);
+  setField("enrollmentGrade", item.enrollmentGrade);
+  setField("enrollmentBand", item.enrollmentBand);
+  setField("care", item.care);
+  setField("careDays", arrayText(item.careDays));
+  setField("extended", item.extended);
+  setField("extendedDays", arrayText(item.extendedDays));
+  setField("lunch", item.lunch);
+  setField("subsidy", item.subsidy);
+  setField("subsidyTypes", arrayText(item.subsidyTypes));
+  setField("notes", item.notes);
+  editDialog.hidden = false;
+  editRegistrationForm.studentName.focus();
+}
+
+function closeEditDialog() {
+  editDialog.hidden = true;
+  editRegistrationForm.reset();
+  editRegistrationForm.removeAttribute("data-registration-id");
+}
+
+function appendActions(row, item) {
+  const cell = document.createElement("td");
+  const actions = document.createElement("div");
+  actions.className = "row-actions";
+
+  const editButton = document.createElement("button");
+  editButton.className = "ghost-link small-action";
+  editButton.type = "button";
+  editButton.textContent = "編輯";
+  editButton.addEventListener("click", () => openEditDialog(item));
+
+  const deleteButton = document.createElement("button");
+  deleteButton.className = "ghost-link danger-action small-action";
+  deleteButton.type = "button";
+  deleteButton.textContent = "刪除";
+  deleteButton.addEventListener("click", async () => {
+    const ok = window.confirm(`確定要刪除「${item.studentName || "這筆"}」的報名資料嗎？刪除後家長查詢也會查不到。`);
+    if (!ok) return;
+    deleteButton.disabled = true;
+    try {
+      await deleteRegistration(item.id);
+      await loadAdmin();
+    } catch (error) {
+      window.alert(`刪除失敗：${friendlyError(error)}`);
+      deleteButton.disabled = false;
+    }
+  });
+
+  actions.append(editButton, deleteButton);
+  cell.append(actions);
+  row.append(cell);
+}
+
 function renderRows() {
   const keyword = searchBox.value.trim();
   const filtered = registrations.filter((item) => matchRow(item, keyword));
 
   if (!filtered.length) {
-    rowsBody.innerHTML = '<tr><td colspan="9">目前沒有符合條件的報名資料。</td></tr>';
+    rowsBody.innerHTML = '<tr><td colspan="10">目前沒有符合條件的報名資料。</td></tr>';
     return;
   }
 
@@ -96,6 +190,7 @@ function renderRows() {
       appendCell(row, item.lunch);
       appendCell(row, `${item.subsidy || ""}\n${Array.isArray(item.subsidyTypes) ? item.subsidyTypes.join("、") : item.subsidyTypes || ""}`);
       appendCell(row, `${item.parentName || ""}\n${item.parentPhone || ""}\n${item.email || ""}`);
+      appendActions(row, item);
       return row;
     })
   );
@@ -197,6 +292,46 @@ async function loadAdmin() {
 
 searchBox.addEventListener("input", renderRows);
 exportCsvButton.addEventListener("click", exportCsv);
+closeEditButton.addEventListener("click", closeEditDialog);
+cancelEditButton.addEventListener("click", closeEditDialog);
+
+editDialog.addEventListener("click", (event) => {
+  if (event.target === editDialog) closeEditDialog();
+});
+
+editRegistrationForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const id = editRegistrationForm.dataset.registrationId;
+  if (!currentItem(id)) return;
+
+  editMessage.textContent = "儲存中";
+  try {
+    await updateRegistration(id, {
+      studentName: formValue("studentName"),
+      gender: formValue("gender"),
+      className: formValue("className"),
+      parentName: formValue("parentName"),
+      parentPhone: formValue("parentPhone"),
+      email: formValue("email"),
+      registrationTerm: formValue("registrationTerm"),
+      currentGrade: formValue("currentGrade"),
+      enrollmentGrade: formValue("enrollmentGrade"),
+      enrollmentBand: formValue("enrollmentBand"),
+      care: formValue("care"),
+      careDays: textToArray(formValue("careDays")),
+      extended: formValue("extended"),
+      extendedDays: textToArray(formValue("extendedDays")),
+      lunch: formValue("lunch"),
+      subsidy: formValue("subsidy"),
+      subsidyTypes: textToArray(formValue("subsidyTypes")),
+      notes: formValue("notes")
+    });
+    await loadAdmin();
+    closeEditDialog();
+  } catch (error) {
+    editMessage.textContent = `儲存失敗：${friendlyError(error)}`;
+  }
+});
 
 settingsForm.addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -260,7 +395,7 @@ try {
     if (!hasLoadedAdmin) {
       hasLoadedAdmin = true;
       loadAdmin().catch((error) => {
-        rowsBody.innerHTML = `<tr><td colspan="9">後台資料載入失敗：${friendlyError(error)}</td></tr>`;
+        rowsBody.innerHTML = `<tr><td colspan="10">後台資料載入失敗：${friendlyError(error)}</td></tr>`;
       });
     }
   });

@@ -10,7 +10,7 @@ service cloud.firestore {
     match /registrations/{docId} {
       allow create: if true;
       allow read: if isAdmin();
-      allow update, delete: if false;
+      allow update, delete: if isAdmin();
     }
 
     match /registrationLookups/{lookupKey} {
@@ -18,7 +18,7 @@ service cloud.firestore {
 
       match /entries/{entryId} {
         allow get, list: if true;
-        allow create: if request.resource.data.keys().hasOnly([
+        allow create: if isAdmin() || (request.resource.data.keys().hasOnly([
             'registrationId',
             'studentName',
             'className',
@@ -29,8 +29,8 @@ service cloud.firestore {
             'submittedAt'
           ])
           && request.resource.data.registrationId == entryId
-          && request.resource.data.submittedAt == request.time;
-        allow update, delete: if false;
+          && request.resource.data.submittedAt == request.time);
+        allow update, delete: if isAdmin();
       }
     }
 

@@ -140,6 +140,7 @@ export async function createRegistration(payload) {
 
   batch.set(registrationRef, {
     ...payload,
+    lookupKey,
     submittedAt
   });
   batch.set(lookupRef, {
@@ -158,6 +159,71 @@ export async function createRegistration(payload) {
     id: registrationRef.id,
     submitted_at: new Date().toLocaleString("zh-TW", { hour12: false })
   };
+}
+
+function lookupPayloadForRegistration(id, data, submittedAt) {
+  return {
+    registrationId: id,
+    studentName: data.studentName || "",
+    className: data.className || "",
+    registrationTerm: data.registrationTerm || "",
+    currentGrade: data.currentGrade || "",
+    enrollmentGrade: data.enrollmentGrade || "",
+    enrollmentBand: data.enrollmentBand || "",
+    submittedAt
+  };
+}
+
+async function lookupKeyForExisting(data) {
+  if (data.lookupKey) return data.lookupKey;
+  if (!data.studentName || !data.parentPhone) return "";
+  return registrationLookupKey(data.studentName, data.parentPhone);
+}
+
+export async function updateRegistration(id, updates) {
+  const { db } = ensureFirebase();
+  const registrationRef = doc(db, "registrations", id);
+  const snap = await getDoc(registrationRef);
+  if (!snap.exists()) throw new Error("找不到這筆報名資料。");
+
+  const current = snap.data();
+  const next = { ...current, ...updates };
+  const oldLookupKey = await lookupKeyForExisting(current);
+  const newLookupKey = await registrationLookupKey(next.studentName, next.parentPhone);
+  const submittedAt = current.submittedAt || serverTimestamp();
+  const batch = writeBatch(db);
+
+  batch.update(registrationRef, {
+    ...updates,
+    lookupKey: newLookupKey,
+    updatedAt: serverTimestamp()
+  });
+
+  if (oldLookupKey) {
+    batch.delete(doc(db, "registrationLookups", oldLookupKey, "entries", id));
+  }
+  batch.set(
+    doc(db, "registrationLookups", newLookupKey, "entries", id),
+    lookupPayloadForRegistration(id, next, submittedAt)
+  );
+
+  await batch.commit();
+}
+
+export async function deleteRegistration(id) {
+  const { db } = ensureFirebase();
+  const registrationRef = doc(db, "registrations", id);
+  const snap = await getDoc(registrationRef);
+  if (!snap.exists()) return;
+
+  const data = snap.data();
+  const lookupKey = await lookupKeyForExisting(data);
+  const batch = writeBatch(db);
+  batch.delete(registrationRef);
+  if (lookupKey) {
+    batch.delete(doc(db, "registrationLookups", lookupKey, "entries", id));
+  }
+  await batch.commit();
 }
 
 export async function findRegistrationStatus(studentName, parentPhone) {
