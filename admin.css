@@ -5,6 +5,10 @@
   padding: 24px;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 .admin-login-panel {
   width: min(420px, 100%);
   padding: 26px;

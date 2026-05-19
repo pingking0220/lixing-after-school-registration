@@ -55,6 +55,8 @@ function friendlyError(error) {
 }
 
 function showAdmin() {
+  adminLoginForm.reset();
+  loginMessage.textContent = "";
   adminLogin.hidden = true;
   adminApp.hidden = false;
 }
