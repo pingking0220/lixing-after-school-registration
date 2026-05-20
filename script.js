@@ -16,6 +16,7 @@ const brochureName = document.querySelector("#brochureName");
 const brochureNote = document.querySelector("#brochureNote");
 const confirmRules = document.querySelector('[name="confirmRules"]');
 const classHint = document.querySelector("#classHint");
+const registrationStatus = document.querySelector("#registrationStatus");
 const resetButton = document.querySelector("#resetButton");
 const editButton = document.querySelector("#editButton");
 const submitButton = document.querySelector("#submitButton");
@@ -33,11 +34,18 @@ let appSettings = {
   schoolYear: "115",
   semester: "上學期",
   registrationDisplayName: "115學年上學期",
+  registrationOpenAt: null,
+  registrationCloseAt: null,
   brochurePath: "brochures/115-1課後照顧班招生簡章(二到六年級).pdf",
   brochureName: "115-1課後照顧班招生簡章(二到六年級).pdf"
 };
 let keepSummaryAfterReset = false;
 let pendingPayload = null;
+let registrationAvailability = {
+  isOpen: true,
+  message: ""
+};
+let isFormLocked = false;
 
 const gradeKey = {
   低年級: "low",
@@ -132,23 +140,27 @@ function updateGradeFromClassName() {
 function setGroupEnabled(container, enabled) {
   container.classList.toggle("is-muted", !enabled);
   container.querySelectorAll("input").forEach((input) => {
-    input.disabled = !enabled;
+    input.disabled = shouldDisableControl(!enabled);
     if (!enabled) input.checked = false;
   });
 }
 
+function shouldDisableControl(blocked = false) {
+  return blocked || isFormLocked || !registrationAvailability.isOpen;
+}
+
 function setFieldsLocked(locked) {
+  isFormLocked = locked;
   form.querySelectorAll("input, select, textarea").forEach((control) => {
-    if (control.type !== "hidden") control.disabled = locked;
+    if (control.type !== "hidden") control.disabled = shouldDisableControl(false);
   });
 
-  if (!locked) {
-    updateGradePanel();
-    updateConditionalGroups();
-    if (brochureLink.getAttribute("href") && confirmRules.checked) {
-      confirmRules.disabled = false;
-    }
+  updateGradePanel();
+  updateConditionalGroups();
+  if (!locked && registrationAvailability.isOpen && brochureLink.getAttribute("href") && confirmRules.checked) {
+    confirmRules.disabled = false;
   }
+  updateActionButtons();
 }
 
 function setConfirmationMode(enabled) {
@@ -157,6 +169,13 @@ function setConfirmationMode(enabled) {
   editButton.hidden = !enabled;
   confirmSubmitButton.hidden = !enabled;
   setFieldsLocked(enabled);
+}
+
+function updateActionButtons() {
+  submitButton.disabled = !registrationAvailability.isOpen;
+  if (!pendingPayload) {
+    confirmSubmitButton.disabled = !registrationAvailability.isOpen;
+  }
 }
 
 function showSuccessMessage(payload, result) {
@@ -186,6 +205,83 @@ function updateBrochure(settings) {
   brochureNote.textContent = "請點選「另開簡章」閱讀後，再回到本頁勾選確認。";
   confirmRules.disabled = true;
   confirmRules.checked = false;
+}
+
+function normalizeDate(value) {
+  if (!value) return null;
+  if (value instanceof Date) return Number.isNaN(value.getTime()) ? null : value;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function formatDateTime(value) {
+  const date = normalizeDate(value);
+  if (!date) return "";
+  return date.toLocaleString("zh-TW", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false
+  });
+}
+
+function checkRegistrationAvailability(settings, now = new Date()) {
+  const openAt = normalizeDate(settings.registrationOpenAt);
+  const closeAt = normalizeDate(settings.registrationCloseAt);
+
+  if (openAt && now < openAt) {
+    return {
+      isOpen: false,
+      message: `報名尚未開放，開放時間：${formatDateTime(openAt)}。`
+    };
+  }
+
+  if (closeAt && now > closeAt) {
+    return {
+      isOpen: false,
+      message: `報名已截止，截止時間：${formatDateTime(closeAt)}。`
+    };
+  }
+
+  if (openAt && closeAt) {
+    return {
+      isOpen: true,
+      message: `目前開放報名中，報名期間：${formatDateTime(openAt)} 至 ${formatDateTime(closeAt)}。`
+    };
+  }
+
+  if (closeAt) {
+    return {
+      isOpen: true,
+      message: `目前開放報名中，截止時間：${formatDateTime(closeAt)}。`
+    };
+  }
+
+  if (openAt) {
+    return {
+      isOpen: true,
+      message: `目前開放報名中，開放時間：${formatDateTime(openAt)}。`
+    };
+  }
+
+  return {
+    isOpen: true,
+    message: "目前開放報名中。"
+  };
+}
+
+function updateRegistrationAvailability() {
+  registrationAvailability = checkRegistrationAvailability(appSettings);
+  registrationStatus.textContent = registrationAvailability.message;
+  registrationStatus.classList.toggle("is-closed", !registrationAvailability.isOpen);
+  setFieldsLocked(isFormLocked);
+
+  if (!registrationAvailability.isOpen) {
+    pendingPayload = null;
+    setConfirmationMode(false);
+  }
 }
 
 function getEnrollmentGradeNumber() {
@@ -228,7 +324,7 @@ function updateGradePanel() {
     const active = panel.dataset.grade === grade;
     panel.hidden = !active;
     panel.querySelectorAll("input").forEach((input) => {
-      input.disabled = !active;
+      input.disabled = shouldDisableControl(!active);
       if (!active) input.checked = false;
     });
   });
@@ -258,6 +354,10 @@ function validateGroupedChoices() {
   const enrollment = getEnrollmentGrade();
   const grade = enrollment.band;
   const key = gradeKey[grade];
+
+  if (!registrationAvailability.isOpen) {
+    messages.push(registrationAvailability.message || "目前不在報名開放期間，無法送出報名。");
+  }
 
   if (confirmRules.disabled || !confirmRules.checked) {
     messages.push("請先另開並閱讀招生簡章，再勾選家長確認。");
@@ -416,6 +516,7 @@ form.addEventListener("reset", () => {
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
+  updateRegistrationAvailability();
   updateGradeFromClassName();
   updateConditionalGroups();
 
@@ -436,6 +537,8 @@ editButton.addEventListener("click", () => {
 
 confirmSubmitButton.addEventListener("click", async () => {
   if (!pendingPayload) return;
+  updateRegistrationAvailability();
+  if (!registrationAvailability.isOpen) return;
 
   const payload = pendingPayload;
   confirmSubmitButton.disabled = true;
@@ -460,6 +563,7 @@ confirmSubmitButton.addEventListener("click", async () => {
     confirmSubmitButton.disabled = false;
     editButton.disabled = false;
     confirmSubmitButton.textContent = "確認報名";
+    updateActionButtons();
   }
 });
 
@@ -493,6 +597,7 @@ async function loadSettings() {
     brochureNote.textContent = error.message;
   } finally {
     updateBrochure(appSettings);
+    updateRegistrationAvailability();
     updateGradePanel();
     updateConditionalGroups();
   }
@@ -500,8 +605,10 @@ async function loadSettings() {
 
 brochureLink.addEventListener("click", () => {
   if (!brochureLink.getAttribute("href")) return;
-  confirmRules.disabled = false;
+  if (!registrationAvailability.isOpen) return;
+  confirmRules.disabled = isFormLocked;
   brochureNote.textContent = "已開啟招生簡章。閱讀完畢後，請回到本頁勾選確認。";
 });
 
 loadSettings();
+window.setInterval(updateRegistrationAvailability, 60000);

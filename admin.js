@@ -272,6 +272,21 @@ function normalizeYear(value) {
   return value.trim().replace(/[０-９]/g, (digit) => String.fromCharCode(digit.charCodeAt(0) - 0xfee0));
 }
 
+function dateInputValue(value) {
+  if (!value) return "";
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0, 16);
+}
+
+function dateFromInput(value) {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) throw new Error("請確認開放與關閉報名時間格式。");
+  return date;
+}
+
 function exportCsv() {
   const headers = [
     "送出時間",
@@ -345,6 +360,8 @@ async function loadAdmin() {
   settingsForm.querySelector('[name="schoolYear"]').value = settings.schoolYear;
   settingsForm.querySelector('[name="semester"]').value = settings.semester;
   settingsForm.querySelector('[name="registrationTerm"]').value = settings.registrationTerm;
+  settingsForm.querySelector('[name="registrationOpenAt"]').value = dateInputValue(settings.registrationOpenAt);
+  settingsForm.querySelector('[name="registrationCloseAt"]').value = dateInputValue(settings.registrationCloseAt);
   updateBrochureLink(settings);
   renderAdminAccounts();
   renderStats();
@@ -401,11 +418,18 @@ settingsForm.addEventListener("submit", async (event) => {
   try {
     const schoolYear = normalizeYear(settingsForm.querySelector('[name="schoolYear"]').value);
     if (!schoolYear) throw new Error("請填寫學年。");
+    const registrationOpenAt = dateFromInput(settingsForm.querySelector('[name="registrationOpenAt"]').value);
+    const registrationCloseAt = dateFromInput(settingsForm.querySelector('[name="registrationCloseAt"]').value);
+    if (registrationOpenAt && registrationCloseAt && registrationCloseAt <= registrationOpenAt) {
+      throw new Error("關閉報名時間必須晚於開放報名時間。");
+    }
 
     const result = await saveSettings({
       schoolYear,
       semester: settingsForm.querySelector('[name="semester"]').value,
-      registrationTerm: settingsForm.querySelector('[name="registrationTerm"]').value
+      registrationTerm: settingsForm.querySelector('[name="registrationTerm"]').value,
+      registrationOpenAt,
+      registrationCloseAt
     });
     settingsMessage.textContent = `已儲存：${result.registrationDisplayName}（${result.registrationTermLabel}）`;
   } catch (error) {

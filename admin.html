@@ -113,6 +113,14 @@
               <option value="sameYearSecond">本學年度下學期（不升級）</option>
             </select>
           </label>
+          <label>
+            <span>開放報名時間</span>
+            <input type="datetime-local" name="registrationOpenAt">
+          </label>
+          <label>
+            <span>關閉報名時間</span>
+            <input type="datetime-local" name="registrationCloseAt">
+          </label>
           <button class="primary-button" type="submit">儲存設定</button>
           <p id="settingsMessage" class="settings-message" aria-live="polite"></p>
         </form>

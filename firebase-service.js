@@ -65,6 +65,8 @@ function normalizeSettings(settings = {}) {
   const registrationTerm = settings.registrationTerm || defaultSettings.registrationTerm;
   const schoolYear = String(settings.schoolYear || defaultSettings.schoolYear).trim() || defaultSettings.schoolYear;
   const semester = settings.semester || defaultSettings.semester;
+  const registrationOpenAt = normalizeDateSetting(settings.registrationOpenAt);
+  const registrationCloseAt = normalizeDateSetting(settings.registrationCloseAt);
   return {
     ...defaultSettings,
     ...settings,
@@ -72,8 +74,21 @@ function normalizeSettings(settings = {}) {
     registrationTermLabel: termLabels[registrationTerm] || defaultSettings.registrationTermLabel,
     schoolYear,
     semester,
+    registrationOpenAt,
+    registrationCloseAt,
     registrationDisplayName: `${schoolYear}學年${semester}`
   };
+}
+
+function normalizeDateSetting(value) {
+  if (!value) return null;
+  if (value instanceof Date) return Number.isNaN(value.getTime()) ? null : value;
+  if (typeof value.toDate === "function") {
+    const date = value.toDate();
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
 }
 
 function timestampText(value) {

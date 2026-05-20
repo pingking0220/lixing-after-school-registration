@@ -10,12 +10,24 @@ service cloud.firestore {
         );
     }
 
+    function registrationWindowAllowsCreate() {
+      return !exists(/databases/$(database)/documents/settings/app)
+        || (
+          (!('registrationOpenAt' in get(/databases/$(database)/documents/settings/app).data)
+            || get(/databases/$(database)/documents/settings/app).data.registrationOpenAt == null
+            || get(/databases/$(database)/documents/settings/app).data.registrationOpenAt <= request.time)
+          && (!('registrationCloseAt' in get(/databases/$(database)/documents/settings/app).data)
+            || get(/databases/$(database)/documents/settings/app).data.registrationCloseAt == null
+            || request.time <= get(/databases/$(database)/documents/settings/app).data.registrationCloseAt)
+        );
+    }
+
     match /adminUsers/{email} {
       allow read, create, update, delete: if isAdmin();
     }
 
     match /registrations/{docId} {
-      allow create: if true;
+      allow create: if registrationWindowAllowsCreate();
       allow read: if isAdmin();
       allow update, delete: if isAdmin();
     }
@@ -36,7 +48,8 @@ service cloud.firestore {
             'submittedAt'
           ])
           && request.resource.data.registrationId == entryId
-          && request.resource.data.submittedAt == request.time);
+          && request.resource.data.submittedAt == request.time
+          && registrationWindowAllowsCreate());
         allow update, delete: if isAdmin();
       }
     }

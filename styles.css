@@ -121,6 +121,23 @@ h1 {
   font-weight: 600;
 }
 
+.registration-status {
+  margin: 22px clamp(20px, 4vw, 40px) 0;
+  padding: 16px 18px;
+  border: 1px solid #b9d5c7;
+  border-radius: 8px;
+  color: var(--leaf);
+  background: #eef8f1;
+  font-weight: 800;
+  line-height: 1.7;
+}
+
+.registration-status.is-closed {
+  color: #9b3a22;
+  border-color: #ecc2b0;
+  background: #fff3ec;
+}
+
 form {
   padding: clamp(20px, 4vw, 40px);
 }
@@ -203,6 +220,7 @@ legend {
 input[type="text"],
 input[type="tel"],
 input[type="email"],
+input[type="datetime-local"],
 select,
 textarea {
   width: 100%;
@@ -221,6 +239,7 @@ textarea {
 input[type="text"]:focus,
 input[type="tel"]:focus,
 input[type="email"]:focus,
+input[type="datetime-local"]:focus,
 select:focus,
 textarea:focus {
   border-color: var(--leaf);
@@ -647,6 +666,7 @@ textarea:focus {
   input[type="text"],
   input[type="tel"],
   input[type="email"],
+  input[type="datetime-local"],
   select,
   textarea {
     min-height: 52px;
