@@ -22,6 +22,8 @@ const resetButton = document.querySelector("#resetButton");
 const editButton = document.querySelector("#editButton");
 const submitButton = document.querySelector("#submitButton");
 const confirmSubmitButton = document.querySelector("#confirmSubmitButton");
+const pendingDialog = document.querySelector("#pendingDialog");
+const pendingCloseButton = document.querySelector("#pendingCloseButton");
 const successDialog = document.querySelector("#successDialog");
 const successMessage = document.querySelector("#successMessage");
 const successCloseButton = document.querySelector("#successCloseButton");
@@ -166,6 +168,7 @@ function setFieldsLocked(locked) {
 
 function setConfirmationMode(enabled) {
   confirmationNotice.hidden = !enabled;
+  if (!enabled) hidePendingConfirmationMessage();
   resetButton.hidden = enabled;
   submitButton.hidden = enabled;
   editButton.hidden = !enabled;
@@ -178,6 +181,15 @@ function updateActionButtons() {
   if (!pendingPayload) {
     confirmSubmitButton.disabled = !registrationAvailability.isOpen;
   }
+}
+
+function showPendingConfirmationMessage() {
+  pendingDialog.hidden = false;
+  pendingCloseButton.focus();
+}
+
+function hidePendingConfirmationMessage() {
+  pendingDialog.hidden = true;
 }
 
 function showSuccessMessage(payload, result) {
@@ -537,6 +549,7 @@ form.addEventListener("submit", async (event) => {
   pendingPayload = collectPayload();
   renderSummary(pendingPayload);
   setConfirmationMode(true);
+  showPendingConfirmationMessage();
   summaryContent.scrollIntoView({ behavior: "smooth", block: "nearest" });
 });
 
@@ -577,6 +590,12 @@ confirmSubmitButton.addEventListener("click", async () => {
     confirmSubmitButton.textContent = "確認報名";
     updateActionButtons();
   }
+});
+
+pendingCloseButton.addEventListener("click", hidePendingConfirmationMessage);
+
+pendingDialog.addEventListener("click", (event) => {
+  if (event.target === pendingDialog) hidePendingConfirmationMessage();
 });
 
 successCloseButton.addEventListener("click", hideSuccessMessage);

@@ -592,6 +592,10 @@ textarea:focus {
   font-size: 1.8rem;
 }
 
+.success-card.pending-card h2 {
+  color: #9b3a22;
+}
+
 .success-card p {
   line-height: 1.7;
 }
