@@ -17,6 +17,7 @@ const brochureNote = document.querySelector("#brochureNote");
 const confirmRules = document.querySelector('[name="confirmRules"]');
 const classHint = document.querySelector("#classHint");
 const registrationStatus = document.querySelector("#registrationStatus");
+const confirmationNotice = document.querySelector("#confirmationNotice");
 const resetButton = document.querySelector("#resetButton");
 const editButton = document.querySelector("#editButton");
 const submitButton = document.querySelector("#submitButton");
@@ -164,6 +165,7 @@ function setFieldsLocked(locked) {
 }
 
 function setConfirmationMode(enabled) {
+  confirmationNotice.hidden = !enabled;
   resetButton.hidden = enabled;
   submitButton.hidden = enabled;
   editButton.hidden = !enabled;
@@ -409,6 +411,15 @@ function addSummaryRow(list, label, value) {
 }
 
 function renderSummary(payload, submitResult = {}) {
+  const fragment = document.createDocumentFragment();
+
+  if (!submitResult.submitted_at) {
+    const notice = document.createElement("p");
+    notice.className = "summary-alert";
+    notice.textContent = "目前僅供核對，尚未報名成功。請確認資料無誤後，再按「確認報名」完成報名。";
+    fragment.append(notice);
+  }
+
   const list = document.createElement("dl");
 
   if (submitResult.submitted_at) {
@@ -435,7 +446,8 @@ function renderSummary(payload, submitResult = {}) {
   addSummaryRow(list, "備註", payload.notes);
 
   summaryContent.className = "";
-  summaryContent.replaceChildren(list);
+  fragment.append(list);
+  summaryContent.replaceChildren(fragment);
 }
 
 function renderLookupResults(items) {

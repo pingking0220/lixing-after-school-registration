@@ -432,6 +432,22 @@ textarea:focus {
   line-height: 1.8;
 }
 
+.confirmation-notice,
+.summary-alert {
+  margin: 18px 0 0;
+  padding: 14px 16px;
+  border: 1px solid #f2db9d;
+  border-radius: 8px;
+  color: #7b4c00;
+  background: #fff9e7;
+  font-weight: 800;
+  line-height: 1.7;
+}
+
+.summary-alert {
+  margin: 0 0 14px;
+}
+
 .form-actions {
   display: flex;
   justify-content: flex-end;
