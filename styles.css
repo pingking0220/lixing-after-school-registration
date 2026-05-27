@@ -600,7 +600,13 @@ textarea:focus {
   line-height: 1.7;
 }
 
-.success-card .primary-button {
+.modal-actions {
+  display: grid;
+  gap: 10px;
+}
+
+.success-card .primary-button,
+.success-card .ghost-button {
   width: 100%;
 }
 

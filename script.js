@@ -23,6 +23,7 @@ const editButton = document.querySelector("#editButton");
 const submitButton = document.querySelector("#submitButton");
 const confirmSubmitButton = document.querySelector("#confirmSubmitButton");
 const pendingDialog = document.querySelector("#pendingDialog");
+const pendingEditButton = document.querySelector("#pendingEditButton");
 const pendingCloseButton = document.querySelector("#pendingCloseButton");
 const successDialog = document.querySelector("#successDialog");
 const successMessage = document.querySelector("#successMessage");
@@ -190,6 +191,13 @@ function showPendingConfirmationMessage() {
 
 function hidePendingConfirmationMessage() {
   pendingDialog.hidden = true;
+}
+
+function returnToEditMode() {
+  pendingPayload = null;
+  setConfirmationMode(false);
+  summaryContent.className = "summary-empty";
+  summaryContent.textContent = "修改後請再按一次送出報名，系統會重新產生摘要。";
 }
 
 function showSuccessMessage(payload, result) {
@@ -554,10 +562,7 @@ form.addEventListener("submit", async (event) => {
 });
 
 editButton.addEventListener("click", () => {
-  pendingPayload = null;
-  setConfirmationMode(false);
-  summaryContent.className = "summary-empty";
-  summaryContent.textContent = "修改後請再按一次送出報名，系統會重新產生摘要。";
+  returnToEditMode();
 });
 
 confirmSubmitButton.addEventListener("click", async () => {
@@ -593,6 +598,11 @@ confirmSubmitButton.addEventListener("click", async () => {
 });
 
 pendingCloseButton.addEventListener("click", hidePendingConfirmationMessage);
+
+pendingEditButton.addEventListener("click", () => {
+  hidePendingConfirmationMessage();
+  returnToEditMode();
+});
 
 pendingDialog.addEventListener("click", (event) => {
   if (event.target === pendingDialog) hidePendingConfirmationMessage();
