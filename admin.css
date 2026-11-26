@@ -84,6 +84,27 @@
   margin-bottom: 22px;
 }
 
+.settings-disclosure {
+  margin-bottom: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.settings-disclosure summary {
+  padding: 16px 18px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.settings-disclosure .settings-panel {
+  margin: 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  box-shadow: none;
+}
+
 .settings-panel {
   display: flex;
   justify-content: space-between;
@@ -243,6 +264,25 @@ input[type="file"] {
 
 .table-scroll {
   overflow-x: auto;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 16px 18px;
+}
+
+.pagination div {
+  display: flex;
+  gap: 8px;
+}
+
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 table {

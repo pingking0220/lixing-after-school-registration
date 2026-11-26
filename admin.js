@@ -37,6 +37,11 @@ const cancelEditButton = document.querySelector("#cancelEditButton");
 const editMessage = document.querySelector("#editMessage");
 
 let registrations = [];
+const pageSize = 20;
+let currentPage = 1;
+const pageInfo = document.querySelector("#pageInfo");
+const prevPage = document.querySelector("#prevPage");
+const nextPage = document.querySelector("#nextPage");
 let adminAccounts = [];
 let hasLoadedAdmin = false;
 
@@ -181,6 +186,11 @@ function appendActions(row, item) {
 function renderRows() {
   const keyword = searchBox.value.trim();
   const filtered = registrations.filter((item) => matchRow(item, keyword));
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  currentPage = Math.min(currentPage, totalPages);
+  pageInfo.textContent = `共 ${filtered.length} 筆，第 ${currentPage} / ${totalPages} 頁`;
+  prevPage.disabled = currentPage <= 1;
+  nextPage.disabled = currentPage >= totalPages;
 
   if (!filtered.length) {
     rowsBody.innerHTML = '<tr><td colspan="10">目前沒有符合條件的報名資料。</td></tr>';
@@ -188,7 +198,7 @@ function renderRows() {
   }
 
   rowsBody.replaceChildren(
-    ...filtered.map((item) => {
+    ...filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((item) => {
       const row = document.createElement("tr");
       appendCell(row, item.submitted_at);
       appendCell(row, `${item.studentName || ""}\n${item.gender || ""}`);
@@ -369,7 +379,20 @@ async function loadAdmin() {
   renderRows();
 }
 
-searchBox.addEventListener("input", renderRows);
+searchBox.addEventListener("input", () => {
+  currentPage = 1;
+  renderRows();
+});
+prevPage.addEventListener("click", () => {
+  if (currentPage > 1) {
+    currentPage -= 1;
+    renderRows();
+  }
+});
+nextPage.addEventListener("click", () => {
+  currentPage += 1;
+  renderRows();
+});
 exportCsvButton.addEventListener("click", exportCsv);
 closeEditButton.addEventListener("click", closeEditDialog);
 cancelEditButton.addEventListener("click", closeEditDialog);

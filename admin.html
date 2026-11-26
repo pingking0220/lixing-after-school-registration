@@ -59,36 +59,8 @@
         </article>
       </section>
 
-      <section class="admin-table-panel">
-        <div class="table-toolbar">
-          <h2>報名名冊</h2>
-          <input id="searchBox" type="search" placeholder="搜尋學生、班級、家長、電話或 Email">
-        </div>
-        <div class="table-scroll">
-          <table>
-            <thead>
-              <tr>
-                <th>送出時間</th>
-                <th>學生</th>
-                <th>班級</th>
-                <th>報名年段</th>
-                <th>課後照顧</th>
-                <th>延長照顧</th>
-                <th>午餐</th>
-                <th>補助</th>
-                <th>家長聯絡</th>
-                <th>操作</th>
-              </tr>
-            </thead>
-            <tbody id="registrationRows">
-              <tr>
-                <td colspan="10">載入中</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
+      <details class="settings-disclosure">
+        <summary>報名學期設定</summary>
       <section class="settings-panel">
         <div>
           <h2>報名學期設定</h2>
@@ -129,7 +101,10 @@
           <p id="settingsMessage" class="settings-message" aria-live="polite"></p>
         </form>
       </section>
+      </details>
 
+      <details class="settings-disclosure">
+        <summary>招生簡章設定</summary>
       <section class="settings-panel">
         <div>
           <h2>招生簡章設定</h2>
@@ -144,7 +119,10 @@
           <p id="brochureMessage" class="settings-message" aria-live="polite"></p>
         </form>
       </section>
+      </details>
 
+      <details class="settings-disclosure">
+        <summary>後台帳號管理</summary>
       <section class="settings-panel account-settings-panel">
         <div>
           <h2>後台帳號管理</h2>
@@ -163,6 +141,35 @@
           <button class="primary-button" type="submit">新增後台帳號</button>
           <p id="adminAccountMessage" class="settings-message" aria-live="polite"></p>
         </form>
+      </section>
+      </details>
+
+      <section class="admin-table-panel">
+        <div class="table-toolbar">
+          <h2>報名名冊</h2>
+          <input id="searchBox" type="search" placeholder="搜尋學生、班級、家長、電話或 Email">
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>送出時間</th><th>學生</th><th>班級</th><th>報名年段</th>
+                <th>課後照顧</th><th>延長照顧</th><th>午餐</th><th>補助</th>
+                <th>家長聯絡</th><th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="registrationRows">
+              <tr><td colspan="10">載入中</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <nav class="pagination" aria-label="名冊分頁">
+          <span id="pageInfo" aria-live="polite"></span>
+          <div>
+            <button class="ghost-link" id="prevPage" type="button">上一頁</button>
+            <button class="ghost-link" id="nextPage" type="button">下一頁</button>
+          </div>
+        </nav>
       </section>
     </main>
 
