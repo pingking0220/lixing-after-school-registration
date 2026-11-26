@@ -357,6 +357,7 @@ async function loadAdmin() {
   registrations = items;
   adminAccounts = accounts;
 
+  settingsForm.querySelector('[name="pageTitle"]').value = settings.pageTitle || "";
   settingsForm.querySelector('[name="schoolYear"]').value = settings.schoolYear;
   settingsForm.querySelector('[name="semester"]').value = settings.semester;
   settingsForm.querySelector('[name="registrationTerm"]').value = settings.registrationTerm;
@@ -425,6 +426,7 @@ settingsForm.addEventListener("submit", async (event) => {
     }
 
     const result = await saveSettings({
+      pageTitle: settingsForm.querySelector('[name="pageTitle"]').value.trim(),
       schoolYear,
       semester: settingsForm.querySelector('[name="semester"]').value,
       registrationTerm: settingsForm.querySelector('[name="registrationTerm"]').value,

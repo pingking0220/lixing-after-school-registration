@@ -5,6 +5,8 @@ import {
 } from "./firebase-service.js";
 
 const form = document.querySelector("#registrationForm");
+const pageTitle = document.querySelector("#page-title");
+const defaultPageTitle = pageTitle.textContent;
 const gradePlaceholder = document.querySelector("#gradePlaceholder");
 const gradePanels = [...document.querySelectorAll(".grade-panel")];
 const summaryContent = document.querySelector("#summaryContent");
@@ -637,6 +639,7 @@ async function loadSettings() {
   } catch (error) {
     brochureNote.textContent = error.message;
   } finally {
+    pageTitle.textContent = String(appSettings.pageTitle || "").trim() || defaultPageTitle;
     updateBrochure(appSettings);
     updateRegistrationAvailability();
     updateGradePanel();
